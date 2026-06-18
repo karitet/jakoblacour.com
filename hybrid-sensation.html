@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hybrid Sensation — Jakob la Cour</title>
+<style>
+  :root{
+    --void:#1A1019; --plum:#281927; --plum-2:#31202F;
+    --gold:#AF9F85; --gold-soft:rgba(175,159,133,.58); --gold-faint:rgba(175,159,133,.32);
+    --ember:#C07A4E; --line:rgba(175,159,133,.16); --line-soft:rgba(175,159,133,.09);
+    --serif:"Iowan Old Style",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--void);color:var(--gold);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.4;
+    background-image:radial-gradient(rgba(175,159,133,.06) .5px,transparent .5px);
+    background-size:3px 3px;mix-blend-mode:overlay}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:24px 32px;
+    max-width:1080px;margin:0 auto;position:relative;z-index:20}
+  .brand{font-family:var(--mono);font-size:13px;letter-spacing:.34em;text-transform:uppercase}
+  .back{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-soft)}
+  .back:hover{color:var(--ember)}
+
+  /* HERO */
+  .hero{position:relative;width:100vw;left:50%;margin-left:-50vw;height:88vh;min-height:560px;
+    display:flex;align-items:flex-end;overflow:hidden}
+  .hero-media{position:absolute;inset:0;z-index:0;background:var(--plum)}
+  .hero-media img{width:100%;height:100%;object-fit:cover;display:block}
+  .hero-media::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(26,16,25,.12) 30%,rgba(26,16,25,.92) 100%)}
+  .hero-inner{position:relative;z-index:2;max-width:1080px;margin:0 auto;width:100%;padding:0 32px 8vh}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--ember);margin-bottom:20px}
+  .hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(44px,9vw,104px);line-height:.98;
+    letter-spacing:-.02em;margin:0}
+  .scrollcue{position:absolute;left:50%;bottom:26px;z-index:3;transform:translateX(-50%);
+    font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-faint)}
+
+  /* ESSENCE */
+  .essence{padding:20vh 0 14vh;text-align:center}
+  .essence .lab{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--gold-faint);margin-bottom:36px}
+  .essence p{font-family:var(--serif);font-weight:400;font-size:clamp(26px,4.4vw,46px);line-height:1.22;
+    letter-spacing:-.01em;margin:0 auto;max-width:880px;text-wrap:balance}
+
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:48px}
+  .sec-head .g{color:var(--ember);font-size:14px}
+  .sec-head .t{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-soft)}
+  .sec-head .r{flex:1;height:1px;background:var(--line)}
+
+  /* EDITIONS */
+  .editions{padding:4vh 0 2vh}
+  .edition{display:grid;grid-template-columns:1.5fr 1fr;gap:0;margin-bottom:7vh;
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--void)}
+  .edition.flip{grid-template-columns:1fr 1.5fr}
+  .edition.flip .ed-media{order:2}
+  .ed-media{position:relative;min-height:360px;background:var(--plum)}
+  .ed-media img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+  .ed-body{padding:42px 40px;display:flex;flex-direction:column;justify-content:center}
+  .ed-year{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--gold-soft)}
+  .ed-body h3{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.4vw,38px);margin:12px 0 14px;line-height:1.06}
+  .ed-body p{margin:0;color:var(--gold-soft);font-size:15px;max-width:440px}
+  .tag{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-family:var(--mono);
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ember);align-self:flex-start}
+  .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ember);
+    box-shadow:0 0 0 0 rgba(192,122,78,.6);animation:pulse 2.6s ease-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,122,78,.5)}70%{box-shadow:0 0 0 9px rgba(192,122,78,0)}100%{box-shadow:0 0 0 0 rgba(192,122,78,0)}}
+
+  /* tour dates — the trace */
+  .dates{margin-top:26px;border-top:1px solid var(--line-soft);padding-top:18px}
+  .date{display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.04em;padding:7px 0;color:var(--gold-soft)}
+  .date .v{color:var(--gold)}
+  .date.up .v{color:var(--ember)}
+  .date.past{color:var(--gold-faint)}
+
+  /* the register: the record is stark */
+  .edition.past .ed-media{filter:grayscale(1) contrast(1.03) brightness(.92)}
+  .edition.past .ed-body h3{color:var(--gold-soft)}
+
+  @media(max-width:720px){
+    .edition,.edition.flip{grid-template-columns:1fr}
+    .edition.flip .ed-media{order:0}
+    .ed-media{min-height:240px}
+  }
+
+  /* TRAILER */
+  .trailer{padding:6vh 0 2vh}
+  .frame{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);
+    border-radius:4px;overflow:hidden;background:#000}
+  .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+  /* MATERIAL */
+  .material{padding:12vh 0 4vh}
+  .material .sec-sub{color:var(--gold-soft);font-size:15px;max-width:600px;margin:-30px 0 48px}
+  .elements{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+  .el{background:var(--void);padding:30px 24px;transition:background .4s ease}
+  .el:hover{background:var(--plum)}
+  .el .gl{font-size:16px;color:var(--ember)}
+  .el h4{font-family:var(--serif);font-weight:400;font-size:19px;margin:14px 0 6px}
+  .el p{margin:0;color:var(--gold-soft);font-size:13px}
+  @media(max-width:720px){ .elements{grid-template-columns:1fr 1fr} }
+
+  /* PUBLICATION */
+  .publication{padding:12vh 0 4vh}
+  .pub{display:grid;grid-template-columns:300px 1fr;gap:48px;align-items:start}
+  .pub-art{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--plum)}
+  .pub-art img{width:100%;display:block}
+  .pub-cap{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--gold-faint);padding:12px 14px}
+  .pub-title{font-family:var(--serif);font-weight:400;font-size:clamp(24px,3.2vw,32px);margin:0 0 14px;line-height:1.1}
+  .pub-desc{color:var(--gold-soft);font-size:15px;max-width:490px;margin:0 0 28px}
+  .pub-meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:28px}
+  .pub-meta>div{background:var(--void);padding:14px 16px;display:flex;flex-direction:column;gap:5px}
+  .pub-meta .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-faint)}
+  .pub-meta .v{font-size:14px;color:var(--gold)}
+  .pub-cta{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    border:1px solid var(--line);border-radius:3px;padding:14px 22px;transition:all .3s ease}
+  .pub-cta:hover{border-color:var(--ember);color:var(--ember)}
+  .pub-press{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--gold-soft);line-height:1.9}
+  .pub-press .st{color:var(--ember);letter-spacing:.2em;margin-right:8px}
+  .pub-press a{border-bottom:1px solid var(--line)}
+  .pub-press a:hover{color:var(--ember);border-color:var(--ember)}
+  @media(max-width:720px){ .pub{grid-template-columns:1fr;gap:30px} .pub-art{max-width:280px} }
+  @media(max-width:560px){ .pub-meta{grid-template-columns:1fr} }
+
+  /* PRACTICAL */
+  .practical{padding:12vh 0 2vh}
+  .facts{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid var(--line);margin-bottom:56px}
+  .fact{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line-soft)}
+  .fact .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-faint)}
+  .fact .v{font-size:14px;color:var(--gold-soft)}
+  @media(max-width:680px){ .facts{grid-template-columns:1fr} }
+  .credits{display:grid;grid-template-columns:repeat(2,1fr);gap:22px 60px;max-width:760px}
+  .cr .role{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-faint)}
+  .cr .name{font-family:var(--serif);font-size:18px;margin-top:5px}
+  @media(max-width:560px){ .credits{grid-template-columns:1fr} }
+  .downloads{margin-top:48px;font-family:var(--mono);font-size:12px;letter-spacing:.1em}
+  .downloads a{color:var(--gold-soft);border-bottom:1px solid var(--line);margin-right:22px}
+  .downloads a:hover{color:var(--ember);border-color:var(--ember)}
+
+  footer{margin-top:13vh;border-top:1px solid var(--line);padding:46px 0 64px}
+  .foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-end}
+  .foot .who{font-family:var(--serif);font-size:20px}
+  .foot .det{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--gold-soft);line-height:1.9}
+  .foot a:hover{color:var(--ember)}
+
+  :focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+  @media(prefers-reduced-motion:reduce){ .tag::before{animation:none} html{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+
+  <div class="bar">
+    <a class="brand" href="index.html">Jakob la Cour</a>
+    <a class="back" href="index.html#works">← Works</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-media">
+      <img src="https://jakoblacour.com/wp-content/uploads/2025/09/hybrid-sensation-websize_photo_jacob-stage-2957-800x534.jpg" alt="Hybrid Sensation — Tour Edition" loading="eager">
+    </div>
+    <div class="hero-inner">
+      <div class="kicker">Mixed-reality performance · since 2023</div>
+      <h1>Hybrid&nbsp;Sensation</h1>
+    </div>
+    <div class="scrollcue">↓ enter</div>
+  </section>
+
+  <div class="wrap">
+
+    <!-- ESSENCE -->
+    <section class="essence">
+      <div class="lab">The form</div>
+      <p>A contemporary initiation into the hybrid body.</p>
+    </section>
+
+    <!-- EDITIONS -->
+    <section class="editions" id="editions">
+      <div class="sec-head"><span class="g">◆</span><span class="t">Editions</span><span class="r"></span></div>
+
+      <!-- Tour Edition -->
+      <div class="edition">
+        <div class="ed-media">
+          <img src="https://jakoblacour.com/wp-content/uploads/2025/09/hybrid-sensation-websize_photo_jacob-stage-1220784-800x640.jpg" alt="Hybrid Sensation — Tour Edition, 2025/26" loading="lazy">
+        </div>
+        <div class="ed-body">
+          <span class="ed-year">2025 / 26</span>
+          <h3>Tour Edition</h3>
+          <p>A semi-automated, tour-ready edition for black-box and flexible spaces — eight at a time, a host and a technician.</p>
+          <div class="dates">
+            <div class="date up"><span>Harstad, Festspillene i Nord-Norge (NO)</span><span class="v">24–25 Jun 2026</span></div>
+            <div class="date past"><span>Aveny-T, Copenhagen (DK)</span><span class="v">24–25 Mar 2026</span></div>
+            <div class="date past"><span>H2O, Copenhagen (DK)</span><span class="v">5–6 Mar 2026</span></div>
+            <div class="date past"><span>Limfjordsteatret (DK)</span><span class="v">18 Feb 2026</span></div>
+            <div class="date past"><span>Sydhavn Teater (DK)</span><span class="v">4–5 Feb 2026</span></div>
+            <div class="date past"><span>KU.BE, Frederiksberg (DK)</span><span class="v">27 Jan 2026</span></div>
+          </div>
+          <span class="tag">On tour</span>
+        </div>
+      </div>
+
+      <!-- Premiere -->
+      <div class="edition past flip">
+        <div class="ed-media">
+          <img src="https://jakoblacour.com/wp-content/uploads/2023/09/20231030-hs-01-1-800x533.jpg" alt="Hybrid Sensation — premiere, The Royal Danish Theatre, 2023" loading="lazy">
+        </div>
+        <div class="ed-body">
+          <span class="ed-year">2023</span>
+          <h3>The Royal Danish Theatre</h3>
+          <p>The premiere — a 40-minute mixed-reality performance, selected for KSelekt.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAILER -->
+    <section class="trailer">
+      <div class="frame">
+        <iframe src="https://www.youtube.com/embed/jIXIe7PGLAQ" title="Hybrid Sensation — trailer" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <!-- MATERIAL -->
+    <section class="material" id="material">
+      <div class="sec-head"><span class="g">⬡</span><span class="t">What it grows from</span><span class="r"></span></div>
+      <p class="sec-sub">Wearing VR headsets, audiences enter a shared sensory environment — a mini cosmos where the physical meets the meta-real in a bath of light and spatial sound.</p>
+      <div class="elements">
+        <div class="el"><div class="gl">◇</div><h4>Mixed reality</h4><p>A VR headset opens a mini cosmos layered over the room.</p></div>
+        <div class="el"><div class="gl">◇</div><h4>Light &amp; spatial sound</h4><p>An atmospheric, color-fluctuating bath to dissolve into.</p></div>
+        <div class="el"><div class="gl">◇</div><h4>Interaction system</h4><p>A responsive system — move and touch, alone and together.</p></div>
+        <div class="el"><div class="gl">◇</div><h4>The hybrid body</h4><p>Reality, body and identity, gently transformed.</p></div>
+      </div>
+    </section>
+
+    <!-- PUBLICATION  (artist edition / ISBN album — the work made permanent) -->
+    <section class="publication" id="publication">
+      <div class="sec-head"><span class="g">✦</span><span class="t">Publication</span><span class="r"></span></div>
+      <div class="pub">
+        <div class="pub-art">
+          <img src="https://jakoblacour.com/wp-content/uploads/2023/08/hs-poster-a1-230902-450x637.jpg" alt="Hybrid Sensation — Artist Edition (cover)" loading="lazy">
+          <div class="pub-cap">Artist Edition · forthcoming</div>
+        </div>
+        <div class="pub-detail">
+          <h3 class="pub-title">Hybrid Sensation — Artist Edition</h3>
+          <p class="pub-desc">The work set down as a published album: its canonical 360° master and a bound document of the performance — registered, deposited, archived. The edition is how the work becomes permanent.</p>
+          <div class="pub-meta">
+            <div><span class="k">Format</span><span class="v">Album · 48 pp</span></div>
+            <div><span class="k">Canonical master</span><span class="v">360° VR master</span></div>
+            <div><span class="k">ISBN</span><span class="v">978-87-···-···-·</span></div>
+            <div><span class="k">Archive</span><span class="v">Legal deposit · national bibliography</span></div>
+          </div>
+          <a class="pub-cta" href="#">Reserve the edition →</a>
+          <div class="pub-press">
+            <span class="st">★★★★</span> “…a colorful, sensual VR initiation.” — Anne Liisberg, <a href="https://iscene.dk/2023/11/01/hybrid-sensation-sanselig-vr-indvielse/">Iscene</a><br>
+            <span class="st">★★★★</span> “Insanely beautifully produced.” — Casper Koeller, Sceneblog
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRACTICAL -->
+    <section class="practical" id="practical">
+      <div class="sec-head"><span class="g">◆</span><span class="t">The work</span><span class="r"></span></div>
+      <div class="facts">
+        <div class="fact"><span class="k">Duration</span><span class="v">30 min (tour) · 40 min (premiere)</span></div>
+        <div class="fact"><span class="k">Language</span><span class="v">English voice-over · no dialogue</span></div>
+        <div class="fact"><span class="k">Format</span><span class="v">Semi-automated VR installation · host + technician</span></div>
+        <div class="fact"><span class="k">Capacity</span><span class="v">8 per run · scalable</span></div>
+        <div class="fact"><span class="k">Venue</span><span class="v">Black box · min 7×7 m · blackout</span></div>
+        <div class="fact"><span class="k">Premiere</span><span class="v">The Royal Danish Theatre · 30 Oct 2023</span></div>
+        <div class="fact"><span class="k">Advisory</span><span class="v">16+ · haze · strong scents · strobe · contact</span></div>
+        <div class="fact"><span class="k">Access</span><span class="v">Wheelchair accessible · seating on request</span></div>
+      </div>
+      <div class="credits">
+        <div class="cr"><div class="role">Artistic Direction · Concept · VR Art</div><div class="name">Jakob la Cour</div></div>
+        <div class="cr"><div class="role">Scenography</div><div class="name">Frederikke Krogh</div></div>
+        <div class="cr"><div class="role">Sound (orig. · adapted for tour)</div><div class="name">Julie Østengaard</div></div>
+        <div class="cr"><div class="role">VR Development</div><div class="name">Mattias Brunacci · Harm van de Ven</div></div>
+        <div class="cr"><div class="role">Host · Technician</div><div class="name">Frederikke Hooge · Will Zawistowski</div></div>
+        <div class="cr"><div class="role">Production</div><div class="name">Jakob la Cour Studio</div></div>
+      </div>
+      <div class="downloads">
+        <a href="https://docs.google.com/document/d/1MWUV3ht5km4I1dJbifqTAzz8FpqzgzTS/edit?usp=sharing">Press kit ↗</a>
+        <a href="https://www.dropbox.com/scl/fo/7vk1cho5omph35we901me/AL9SjKYHahN1_MexpWwKac8?rlkey=acj4g3uzre5pjsr50es18qzuw&dl=0">Media ↗</a>
+      </div>
+    </section>
+
+    <footer id="contact">
+      <div class="foot">
+        <div>
+          <div class="who">Book Hybrid Sensation</div>
+          <div class="det" style="color:var(--gold-soft);margin-top:8px">Touring inquiries and bookings.</div>
+        </div>
+        <div class="det">
+          <a href="mailto:production@jakoblacour.com">production@jakoblacour.com</a><br>
+          <a href="index.html">← Back to the front</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

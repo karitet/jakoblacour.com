@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morphic Archive</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<!--
+  SETUP (two things):
+  1) The Pioneer style needs a free Thunderforest key. Create one at thunderforest.com (free tier),
+     paste it into THUNDERFOREST_API_KEY below. Without a key the map falls back to plain OpenStreetMap.
+  2) Your Arkiv tab now needs real coordinates: rename x -> lat and y -> lng,
+     and fill them (in Google Maps: right-click a spot -> click the lat,lng at the top to copy).
+  Tabs read: Arkiv (entries) + Categories (spheres: key,label,glyph,color).
+-->
+<style>
+  :root{
+    --paper:#ECE8E1; --paper2:#F6F3EC; --card:#F7F4ED;
+    --ink:#1C1B18; --muted:#6C6A62; --faint:#9B988E;
+    --accent:#AE3F93; --hair:rgba(28,27,24,.14); --hair2:rgba(28,27,24,.07);
+    --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --display:Georgia,'Iowan Old Style',Palatino,serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;overflow:hidden}
+  .app{display:grid;grid-template-rows:auto 1fr;height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 22px;border-bottom:1px solid var(--hair);background:var(--paper);z-index:1300}
+  .brand{display:flex;align-items:center;gap:14px}
+  .mark{width:30px;height:30px;flex:none}
+  .brand h1{font-size:15px;font-weight:600;letter-spacing:.28em;margin:0;text-transform:uppercase}
+  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;
+    color:var(--muted);text-transform:uppercase;margin-top:3px}
+  .hnav{display:flex;gap:24px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted)}
+  .hlink{font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;
+    background:none;border:0;cursor:pointer;padding:0}
+  .hlink:hover{color:var(--ink)}
+  .main{display:grid;grid-template-columns:86px 1fr;min-height:0}
+  .side{border-right:1px solid var(--hair);padding:18px 0;display:flex;flex-direction:column;gap:4px;
+    background:var(--paper);z-index:1300}
+  .navitem{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 6px;
+    cursor:default;color:var(--faint)}
+  .navitem.on{color:var(--ink)}
+  .navitem.on .ni-ic{background:var(--ink);color:var(--paper2);border-color:var(--ink)}
+  .ni-ic{width:38px;height:38px;border:1px solid var(--hair);border-radius:9px;
+    display:flex;align-items:center;justify-content:center;font-size:16px}
+  .ni-lb{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase}
+  .stage{position:relative;min-height:0;overflow:hidden}
+  #map{position:absolute;inset:0;background:var(--paper)}
+  .leaflet-container{background:#e9e6df;font-family:var(--sans)}
+
+  .gmarker{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    border-radius:50%;background:var(--paper2);box-shadow:0 1px 5px rgba(0,0,0,.28);
+    color:var(--mc,var(--ink));font-size:15px;cursor:pointer;border:1px solid rgba(0,0,0,.1)}
+  .gmarker.on{outline:2px solid var(--accent);outline-offset:2px;color:var(--accent)}
+
+  .legend{position:absolute;left:18px;bottom:78px;display:flex;gap:8px;flex-wrap:wrap;z-index:1100;
+    background:rgba(246,243,236,.9);backdrop-filter:blur(6px);border:1px solid var(--hair);
+    border-radius:12px;padding:8px}
+  .chip{display:flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink);padding:5px 9px;border-radius:7px}
+  .chip .g{font-size:13px}
+  .chip[aria-pressed="false"]{color:var(--faint);text-decoration:line-through;opacity:.7}
+  .chip:hover{background:var(--hair2)}
+
+  .card{position:absolute;top:18px;right:18px;width:300px;max-width:calc(100% - 36px);z-index:1200;
+    background:var(--card);border:1px solid var(--hair);border-radius:14px;
+    box-shadow:0 18px 50px rgba(40,38,32,.22);padding:20px;display:none}
+  .card.show{display:block}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+  .c-kind{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  .c-close{border:0;background:none;font-size:18px;line-height:1;color:var(--muted);cursor:pointer}
+  .c-name{font-family:var(--display);font-size:25px;font-weight:400;letter-spacing:.02em;margin:0 0 14px}
+  .c-img{height:150px;border-radius:9px;margin-bottom:16px;background:#cdd6cf center/cover;
+    display:flex;align-items:center;justify-content:center;color:rgba(28,27,24,.3);font-size:30px}
+  .c-video{position:relative;width:100%;padding-top:56.25%;border-radius:9px;overflow:hidden;
+    margin-bottom:16px;background:#000}
+  .c-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .c-field{margin-bottom:13px}
+  .c-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:3px}
+  .c-val{font-size:14px}
+  .c-desc{font-size:14px;line-height:1.55;color:#36342E;margin:16px 0 4px;
+    padding-top:14px;border-top:1px solid var(--hair2)}
+  .c-more{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none}
+  .c-more:hover{color:var(--accent)}
+  .notice{position:absolute;top:18px;left:18px;z-index:1100;font-family:var(--mono);font-size:10px;
+    letter-spacing:.06em;color:var(--muted);background:rgba(246,243,236,.9);
+    border:1px solid var(--hair);border-radius:8px;padding:6px 10px;display:none}
+  .notice.show{display:block}
+
+  .gmarker.trace{opacity:.4;border-style:dashed;box-shadow:none;filter:grayscale(.35)}
+  .c-book{display:inline-flex;align-items:center;gap:8px;margin-top:8px;font-family:var(--mono);
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper2);
+    background:var(--accent);text-decoration:none;padding:10px 14px;border-radius:8px}
+  .c-hint{font-size:13px;line-height:1.5;color:var(--muted);font-style:italic;margin-top:14px;
+    padding-top:14px;border-top:1px solid var(--hair2)}
+
+  .timeline{position:absolute;left:0;right:0;bottom:0;height:64px;z-index:1100;
+    background:rgba(246,243,236,.93);backdrop-filter:blur(6px);border-top:1px solid var(--hair);
+    padding:22px 28px 0}
+  .tl-hint{position:absolute;right:28px;top:6px;font-family:var(--mono);font-size:8.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .tl-track{position:relative;height:2px;background:var(--hair);margin:0 6px;border-radius:2px;touch-action:none}
+  .tl-tick{position:absolute;top:-5px;width:1px;height:9px;background:rgba(28,27,24,.22);transform:translateX(-50%)}
+  .tl-tick span{position:absolute;top:23px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--faint);white-space:nowrap}
+  .tl-today{position:absolute;top:0;width:1px;height:9px;background:var(--accent);opacity:.55;transform:translateX(-50%)}
+  .tl-today span{position:absolute;top:18px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--accent);white-space:nowrap}
+  .tl-dot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;
+    transform:translate(-50%,-50%);background:var(--ink);cursor:pointer;border:1.5px solid var(--paper2)}
+  .tl-dot:hover{transform:translate(-50%,-50%) scale(1.5)}
+  .tl-handle{position:absolute;top:-11px;height:24px;width:2px;background:var(--ink);transform:translateX(-50%)}
+  .tl-grab{position:absolute;top:-5px;left:50%;width:13px;height:13px;border-radius:50%;
+    background:var(--ink);transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:ew-resize}
+  .tl-date{position:absolute;top:-27px;left:50%;transform:translateX(-50%);font-family:var(--mono);
+    font-size:9px;letter-spacing:.06em;color:var(--ink);white-space:nowrap;
+    background:var(--paper2);padding:2px 6px;border-radius:5px;border:1px solid var(--hair)}
+
+  .infobox{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;
+    background:rgba(28,27,24,.32);backdrop-filter:blur(3px);padding:24px}
+  .infobox.show{display:flex}
+  .info-panel{position:relative;max-width:460px;width:100%;max-height:80vh;overflow:auto;
+    background:var(--card);border:1px solid var(--hair);border-radius:16px;
+    box-shadow:0 24px 60px rgba(40,38,32,.3);padding:34px 30px 30px}
+  .info-close{position:absolute;top:16px;right:18px;border:0;background:none;font-size:22px;
+    line-height:1;color:var(--muted);cursor:pointer}
+  .info-panel h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0 0 16px;letter-spacing:.02em}
+  .info-panel p{font-size:14.5px;line-height:1.6;color:#36342E;margin:0 0 14px}
+  .info-panel em{font-style:italic}
+
+  @media(max-width:760px){
+    .main{grid-template-columns:64px 1fr}
+    .ni-lb{display:none}
+    .card{top:auto;bottom:0;right:0;left:0;width:100%;max-width:100%;z-index:1400;
+      border-radius:14px 14px 0 0;max-height:60vh;overflow:auto}
+    .legend{left:10px;bottom:72px;padding:6px}
+    .tl-hint{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 40 40" fill="none" stroke="#1C1B18" stroke-width="1.4">
+        <path d="M20 4v32M20 12l-8-6M20 12l8-6M20 22l-9-6M20 22l9-6M20 32l-7-5M20 32l7-5"/></svg>
+      <div><h1>Morphic Archive</h1><small>A living archive</small></div>
+    </div>
+    <nav class="hnav"><a class="hlink" href="index.html" style="text-decoration:none">⟵ Front</a><button class="hlink" id="infoBtn">Info</button><span>Search</span></nav>
+  </header>
+  <div class="main">
+    <nav class="side" aria-label="Sections">
+      <div class="navitem on"><div class="ni-ic">✳</div><div class="ni-lb">Map</div></div>
+      <div class="navitem"><div class="ni-ic">▤</div><div class="ni-lb">Archive</div></div>
+      <div class="navitem"><div class="ni-ic">𐅢</div><div class="ni-lb">Chronicle</div></div>
+      <div class="navitem"><div class="ni-ic">◎</div><div class="ni-lb">Rituals</div></div>
+    </nav>
+    <div class="stage">
+      <div id="map"></div>
+      <div class="notice" id="notice"></div>
+      <div class="legend" id="legend"></div>
+      <div class="timeline" id="timeline"><div class="tl-hint">Drag to move through time</div><div class="tl-track" id="tlTrack"></div></div>
+      <aside class="card" id="card" aria-live="polite"></aside>
+    </div>
+  </div>
+</div>
+
+<div class="infobox" id="infobox">
+  <div class="info-panel">
+    <button class="info-close" aria-label="Close" onclick="closeInfo()">×</button>
+    <div id="infoContent"></div>
+  </div>
+</div>
+
+<script>
+const THUNDERFOREST_API_KEY="8a4dcf0f9333457484905b58b929cf05"; // Pioneer tiles
+const SHEET_ID="1o34qaVfp4uuK4zchhYRdWjlXc96Q2tyZQRo5Hsraikw";
+const csvUrl=tab=>`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${tab}`;
+
+// Edit this text to change the Info box:
+const INFO_HTML=`
+  <h2>Morphic Archive</h2>
+  <p>A living archive of <em>Morphic Realities</em> — a work at the meeting point of body, technology and ritual.</p>
+  <p>Each mark on the map is a character, place, event or trace, gathered across the four spheres: geo, bio, techno and astro. Move the handle along the timeline to travel through the work — the past is revealed, the future appears only as traces of what is to come.</p>
+`;
+
+const DEFAULT_CATS=[
+ {key:"geosphere",label:"Geosphere",glyph:"◆",color:"#8A7A55"},
+ {key:"biosphere",label:"Biosphere",glyph:"❂",color:"#5E8C5A"},
+ {key:"technosphere",label:"Technosphere",glyph:"⬡",color:"#AE3F93"},
+ {key:"astrosphere",label:"Astrosphere",glyph:"✦",color:"#5C6FB0"}];
+const ALIAS={geosfære:"geosphere",biosfære:"biosphere",teknosfære:"technosphere",astrosfære:"astrosphere",
+  geo:"geosphere",bio:"biosphere",tekno:"technosphere",techno:"technosphere",astro:"astrosphere"};
+
+const SAMPLE=[
+ {type:"Character",sphere:"Astrosphere",name:"Void",location:"Centre of the work",lat:55.690,lng:12.600,
+  date_start:"2027-06-20",date_added:"2027-06-15",description:"The figure at the centre of the work. Born of stone and light.",image_url:"",link:"#",visible:"TRUE"},
+ {type:"Trace",sphere:"Geosphere",name:"Field Station 00",location:"Solstice",lat:55.980,lng:12.550,
+  date_start:"2027-06-21",date_added:"2027-06-15",description:"Solstice. The pulse of stone — the first geophony trigger.",image_url:"",link:"#",visible:"TRUE"},
+ {type:"Character",sphere:"Biosphere",name:"The Symbiont",location:"Saltholm",lat:55.625,lng:12.760,
+  date_start:"2027-07-02",date_added:"2027-06-28",description:"A being of the tidal zone, living in the seam between body and seaweed.",image_url:"",link:"#",visible:"TRUE"},
+ {type:"Place",sphere:"Technosphere",name:"The Heart Rack",location:"The work's centre",lat:55.675,lng:12.570,
+  date_start:"2027-06-18",date_added:"2027-06-10",description:"The instrument of closeness — heart, microphone and vibration in one rig.",image_url:"",link:"#",visible:"TRUE"}];
+
+const norm=s=>(s||"").trim().toLowerCase();
+const num=s=>{const v=parseFloat(String(s).replace(",","."));return isFinite(v)?v:null};
+const HORIZON_FRAC=0.25; // how far ahead of the handle a future entry shows as a trace
+let CATS=[],CATMAP={},active=new Set(),DATA=[],map,markers=[],fitted=false,CUTOFF=null,TMIN=0,TMAX=0,dragging=false;
+
+function parseCSV(t){const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else{if(c==='"')q=true;else if(c===','){row.push(f);f=""}
+      else if(c==='\n'){row.push(f);rows.push(row);row=[];f=""}
+      else if(c!=='\r')f+=c}}
+  if(f.length||row.length){row.push(f);rows.push(row)}return rows}
+function rowsToObj(rows){if(!rows.length)return[];const h=rows[0].map(x=>norm(x));
+  return rows.slice(1).filter(r=>r.some(c=>c!=="")).map(r=>{const o={};
+    h.forEach((k,i)=>o[k]=(r[i]||"").trim());return o})}
+async function fetchCSV(url){const res=await fetch(url);if(!res.ok)throw 0;return rowsToObj(parseCSV(await res.text()))}
+function indexCats(){CATMAP={};CATS.forEach(c=>{CATMAP[norm(c.key)]=c;CATMAP[norm(c.label)]=c})}
+function resolveCat(s){const n=norm(s);return CATMAP[n]||(ALIAS[n]&&CATMAP[ALIAS[n]])||CATS[0]}
+function notice(m){const n=document.getElementById('notice');n.textContent=m;n.classList.add('show')}
+
+function parseDate(s){if(!s)return null;s=String(s).trim();if(!s)return null;
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return Date.UTC(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if(m){let y=+m[3];if(y<100)y+=2000;return Date.UTC(y,+m[2]-1,+m[1])}
+  let t=Date.parse(s);return isNaN(t)?null:t}
+function fmtDate(t){return new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+function stateOf(d){const t=parseDate(d.date_start);
+  if(t==null||CUTOFF==null)return 'revealed';
+  if(t<=CUTOFF)return 'revealed';
+  if(t<=CUTOFF+HORIZON_FRAC*(TMAX-TMIN))return 'trace';
+  return 'hidden'}
+function applyReveal(){markers.forEach(o=>{const st=stateOf(o.d);
+  if(st==='hidden'){if(map.hasLayer(o.marker))map.removeLayer(o.marker)}
+  else{if(!map.hasLayer(o.marker))o.marker.addTo(map);
+    const el=o.marker._icon&&o.marker._icon.querySelector('.gmarker');
+    if(el)el.classList.toggle('trace',st==='trace')}})}
+
+function pct(t){return (t-TMIN)/(TMAX-TMIN)*100}
+function buildTimeline(){
+  const tl=document.getElementById('timeline');
+  const ds=DATA.map(d=>parseDate(d.date_start)).filter(v=>v!=null);
+  if(!ds.length){tl.style.display='none';return}
+  const today=Date.now();
+  TMIN=Math.min(...ds,today);TMAX=Math.max(...ds,today);
+  const pad=(TMAX-TMIN)*0.06||2592000000;TMIN-=pad;TMAX+=pad;
+  CUTOFF=Math.max(TMIN,Math.min(TMAX,today)); // default: start at today
+  renderTimeline();applyReveal()}
+function renderTimeline(){
+  const tr=document.getElementById('tlTrack');tr.innerHTML="";
+  const y0=new Date(TMIN).getUTCFullYear(),y1=new Date(TMAX).getUTCFullYear();
+  for(let y=y0;y<=y1;y++){const t=Date.UTC(y,0,1);if(t<TMIN||t>TMAX)continue;
+    const e=document.createElement('div');e.className="tl-tick";e.style.left=pct(t)+"%";
+    e.innerHTML=`<span>${y}</span>`;tr.appendChild(e)}
+  const today=Date.now();
+  if(today>=TMIN&&today<=TMAX){const e=document.createElement('div');e.className="tl-today";
+    e.style.left=pct(today)+"%";e.innerHTML="<span>TODAY</span>";tr.appendChild(e)}
+  DATA.forEach(d=>{const t=parseDate(d.date_start);if(t==null)return;
+    const c=resolveCat(d.sphere);const dot=document.createElement('div');dot.className="tl-dot";
+    dot.style.left=pct(t)+"%";dot.style.background=(c&&c.color)||'#1C1B18';dot.title=d.name||"";
+    dot.onclick=ev=>{ev.stopPropagation();CUTOFF=t;updateHandle();applyReveal();
+      document.querySelectorAll('.gmarker.on').forEach(x=>x.classList.remove('on'));openCard(d,'revealed')};
+    tr.appendChild(dot)});
+  const h=document.createElement('div');h.className="tl-handle";h.id="tlHandle";
+  h.innerHTML='<span class="tl-grab"></span><span class="tl-date" id="tlDate"></span>';
+  tr.appendChild(h);updateHandle();setupDrag(tr)}
+function updateHandle(){const h=document.getElementById('tlHandle');if(!h)return;
+  h.style.left=pct(CUTOFF)+"%";const dl=document.getElementById('tlDate');if(dl)dl.textContent=fmtDate(CUTOFF)}
+function setupDrag(tr){
+  const move=e=>{const r=tr.getBoundingClientRect();
+    let x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    x=Math.max(0,Math.min(r.width,x));CUTOFF=TMIN+(x/r.width)*(TMAX-TMIN);updateHandle();applyReveal()};
+  tr.addEventListener('pointerdown',e=>{dragging=true;if(tr.setPointerCapture)tr.setPointerCapture(e.pointerId);move(e)});
+  tr.addEventListener('pointermove',e=>{if(dragging)move(e)});
+  window.addEventListener('pointerup',()=>{dragging=false})}
+
+function embedUrl(u){if(!u)return null;u=String(u).trim();
+  let m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  if(m)return `https://www.youtube.com/embed/${m[1]}`;
+  m=u.match(/vimeo\.com\/(\d+)/);
+  if(m)return `https://player.vimeo.com/video/${m[1]}`;
+  return null}
+function openInfo(){document.getElementById('infoContent').innerHTML=INFO_HTML;
+  document.getElementById('infobox').classList.add('show')}
+function closeInfo(){document.getElementById('infobox').classList.remove('show')}
+
+function initMap(){
+  map=L.map('map',{zoomControl:true,attributionControl:true}).setView([55.72,12.55],9);
+  if(THUNDERFOREST_API_KEY){
+    L.tileLayer(`https://tile.thunderforest.com/pioneer/{z}/{x}/{y}.png?apikey=${THUNDERFOREST_API_KEY}`,
+      {maxZoom:20,attribution:'&copy; Thunderforest, OpenStreetMap contributors'}).addTo(map);
+  }else{
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+    notice("Add your Thunderforest key for the Pioneer map.");
+  }
+  setTimeout(()=>map.invalidateSize(),200);
+}
+
+async function load(){
+  initMap();
+  document.getElementById('infoBtn').onclick=openInfo;
+  document.getElementById('infobox').addEventListener('click',e=>{if(e.target.id==='infobox')closeInfo()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeInfo();closeCard()}});
+  try{CATS=(await fetchCSV(csvUrl("Categories"))).filter(c=>c.key)}catch(e){CATS=[]}
+  if(!CATS.length)CATS=DEFAULT_CATS;
+  indexCats();active=new Set(CATS.map(c=>norm(c.key)));
+  try{const d=await fetchCSV(csvUrl("Arkiv"));DATA=d.length?d:SAMPLE;if(!d.length)notice("Couldn't load the sheet — showing sample data.")}
+  catch(e){DATA=SAMPLE;notice("Couldn't load the sheet — showing sample data.")}
+  DATA=DATA.filter(x=>norm(x.visible||x.visibel||"true")!=="false");
+  buildLegend();renderMarkers();buildTimeline()}
+
+function buildLegend(){const el=document.getElementById('legend');el.innerHTML="";
+  CATS.forEach(c=>{const k=norm(c.key);const b=document.createElement('button');
+    b.className="chip";b.setAttribute('aria-pressed','true');
+    b.innerHTML=`<span class="g" style="color:${c.color||'inherit'}">${c.glyph||'◆'}</span>${c.label||c.key}`;
+    b.onclick=()=>{active.has(k)?active.delete(k):active.add(k);
+      b.setAttribute('aria-pressed',active.has(k));renderMarkers()};
+    el.appendChild(b)})}
+
+function mkIcon(cat){return L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],
+  html:`<div class="gmarker" style="--mc:${(cat&&cat.color)||'#1C1B18'}">${(cat&&cat.glyph)||'◆'}</div>`})}
+
+function renderMarkers(){
+  markers.forEach(m=>map.removeLayer(m.marker));markers=[];
+  const pts=[];
+  DATA.forEach(d=>{const c=resolveCat(d.sphere);if(!c||!active.has(norm(c.key)))return;
+    const lat=num(d.lat||d.latitude),lng=num(d.lng||d.lon||d.longitude);
+    if(lat===null||lng===null)return;
+    const mk=L.marker([lat,lng],{icon:mkIcon(c)}).addTo(map);
+    mk.on('click',()=>{document.querySelectorAll('.gmarker.on').forEach(x=>x.classList.remove('on'));
+      const el=mk._icon&&mk._icon.querySelector('.gmarker');if(el)el.classList.add('on');openCard(d,stateOf(d))});
+    markers.push({marker:mk,d});pts.push([lat,lng])});
+  if(!fitted&&pts.length){map.fitBounds(L.latLngBounds(pts).pad(0.25),{maxZoom:11});fitted=true}
+  applyReveal()}
+
+function openCard(d,state){const c=resolveCat(d.sphere);
+  if(state==='trace'){
+    const when=parseDate(d.date_start);
+    const booking=(d.link&&d.link!=="#")
+      ?`<a class="c-book" href="${d.link}" target="_blank" rel="noopener">Reserve a place →</a>`
+      :`<p class="c-hint">A trace of what's to come.</p>`;
+    document.getElementById('card').innerHTML=`
+      <div class="card-top"><span class="c-kind">Upcoming · ${(c&&c.label)||d.sphere||""}</span>
+        <button class="c-close" aria-label="Close" onclick="closeCard()">×</button></div>
+      <h2 class="c-name">${d.name||""}</h2>
+      <div class="c-img">${(c&&c.glyph)||'◆'}</div>
+      <div class="c-field"><div class="c-label">Expected</div><div class="c-val">${when?fmtDate(when):(d.date_start||"—")}</div></div>
+      ${booking}`;
+    document.getElementById('card').classList.add('show');return}
+  const period=d.date_start?(d.date_end?`${d.date_start} – ${d.date_end}`:d.date_start):"—";
+  const vid=embedUrl(d.video_url);
+  const media=vid?`<div class="c-video"><iframe src="${vid}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`
+    :d.image_url?`<div class="c-img" style="background-image:url('${d.image_url}')"></div>`
+    :`<div class="c-img">${(c&&c.glyph)||'◆'}</div>`;
+  const more=(d.link&&d.link!=="#")?`<a class="c-more" href="${d.link}" target="_blank" rel="noopener">See more →</a>`:"";
+  document.getElementById('card').innerHTML=`
+    <div class="card-top"><span class="c-kind">${d.type?d.type+" · ":""}${(c&&c.label)||d.sphere||""}</span>
+      <button class="c-close" aria-label="Close" onclick="closeCard()">×</button></div>
+    <h2 class="c-name">${d.name||""}</h2>${media}
+    <div class="c-field"><div class="c-label">Location</div><div class="c-val">${d.location||"—"}</div></div>
+    <div class="c-field"><div class="c-label">Active period</div><div class="c-val">${period}</div></div>
+    <div class="c-field"><div class="c-label">Added</div><div class="c-val">${d.date_added||"—"}</div></div>
+    <p class="c-desc">${d.description||""}</p>${more}`;
+  document.getElementById('card').classList.add('show')}
+function closeCard(){document.getElementById('card').classList.remove('show');
+  document.querySelectorAll('.gmarker.on').forEach(x=>x.classList.remove('on'))}
+
+load();
+</script>
+</body>
+</html>

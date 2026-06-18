@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Activities</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --bg:#281927; --fg:#AF9F85; --line:#AF9F85; }
+  body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:1080px; margin:0 auto; padding:24px 16px; }
+  h1 { margin:0 0 12px; font-size:28px; letter-spacing:.02em; }
+  .tools { display:flex; gap:24px; align-items:center; margin:6px 0 18px; flex-wrap:wrap; }
+  .label { font-size:18px; opacity:.95; }
+  .chipset { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { appearance:none; border:1px solid var(--line); background:transparent; color:var(--fg); padding:6px 10px; border-radius:3px; cursor:pointer; font:inherit; }
+  .chip:is(:hover,:focus-visible){ background:rgba(175,159,133,.08); outline:0; }
+  .chip.is-active{ background:rgba(175,159,133,.15); }
+  .section { margin-top:10px; }
+  .section-title { font-size:18px; margin:18px 0 6px; opacity:.95; }
+  .table { width:100%; border-top:1px solid var(--line); }
+  .row { display:grid; grid-template-columns: 150px 90px 1fr 220px; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
+  .head { font-size:12px; text-transform:uppercase; letter-spacing:.08em; opacity:.7; }
+  .col a { color:var(--fg); text-decoration:none; border-bottom:1px solid transparent; }
+  .col a:hover { border-bottom-color:var(--fg); }
+  .title a::after { content:" →"; opacity:.85; }
+  .spacer { height:24px; }
+  .msg { margin-top:10px; opacity:.85; font-size:14px; }
+  @media (max-width:860px){
+    .row{ grid-template-columns: 100px 80px 1fr; }
+    .col-prod{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Activities</h1>
+
+  <div class="tools">
+    <span class="label">Show</span>
+    <div id="show-group" class="chipset">
+  <button class="chip" data-show="">All</button>
+  <button class="chip is-active" data-show="Selected">Selected</button>
+  <button class="chip" data-show="Artistical">Artistical</button>
+  <button class="chip" data-show="Educational">Educational</button>
+</div>
+
+
+    <span class="label">Sort</span>
+    <div id="sort-group" class="chipset">
+      <button class="chip is-active" data-sort="year-desc">Year ↓</button>
+      <button class="chip" data-sort="year-asc">Year ↑</button>
+      <button class="chip" data-sort="title-asc">Title A–Z</button>
+    </div>
+  </div>
+
+  <!-- Upcoming first -->
+  <div class="section" id="upcoming-section">
+    <div class="section-title">Upcoming</div>
+    <div class="table" role="table" aria-label="Upcoming projects">
+      <div class="row head" role="row">
+        <div class="col col-cat"  role="columnheader">Category</div>
+        <div class="col col-year" role="columnheader">Year</div>
+        <div class="col col-title" role="columnheader">Job title</div>
+        <div class="col col-prod" role="columnheader">Production Company</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- Past underneath -->
+  <div class="section" id="past-section">
+    <div class="section-title">Past</div>
+    <div class="table" role="table" aria-label="Past projects">
+      <div class="row head" role="row">
+        <div class="col col-cat"  role="columnheader">Category</div>
+        <div class="col col-year" role="columnheader">Year</div>
+        <div class="col col-title" role="columnheader">Job title</div>
+        <div class="col col-prod" role="columnheader">Production Company</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+/* ===== Your Sheet ===== */
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSdydtmZ-e-n8yk_YlVt4AOnd7eByn6MFs1jFndqsMLVTVdArvbOsQltfniD6VwHOQNLQ2yqujAO3rO/pubhtml?gid=0&single=true';
+/* ====================== */
+
+function toCSV(url){
+  try{
+    const u = new URL(url);
+    if (u.pathname.endsWith('/pubhtml')) {
+      const gid = u.searchParams.get('gid') || '0';
+      return `${u.origin}${u.pathname.replace('/pubhtml','/pub')}?gid=${gid}&single=true&output=csv`;
+    }
+    return url.includes('output=csv') ? url : url + (url.includes('?')?'&':'?') + 'output=csv';
+  }catch{ return url; }
+}
+
+function parseCSV(text){
+  const rows=[]; let cur='',rq=false,row=[];
+  for(let i=0;i<text.length;i++){
+    const c=text[i],n=text[i+1];
+    if(c==='"' && rq && n==='"'){ cur+='"'; i++; continue; }
+    if(c==='"'){ rq=!rq; continue; }
+    if(c===',' && !rq){ row.push(cur); cur=''; continue; }
+    if((c==='\n'||c==='\r') && !rq){ if(cur.length||row.length){ row.push(cur); rows.push(row); row=[]; cur=''; } continue; }
+    cur+=c;
+  }
+  if(cur.length||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r => r.length && r.some(c => String(c).trim()!==''));
+}
+const norm = s => String(s||'')
+  .toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/\s+/g,' ')
+  .trim();
+
+const COL = {
+  job:  ['job title','job titel','title','titel','work','værk','vaerk'],
+  year: ['year','aar','år','date','dato'],
+  prod: ['production company','company','producer','producent','produktion','produktionsselskab','produktion selskab'],
+  url:  ['url','link','href'],
+  cat:  ['category','kategori','artistical/educational','artistic/educational','type'],
+  sel:  ['selected','udvalgt','yes/no','selected?','is selected'],
+  stat: ['status','state','aktiv','active/past']
+};
+function findHeaderRow(rows){
+  const aliases = Object.values(COL).flat();
+  return rows.findIndex(r => r.map(norm).some(h => aliases.includes(h)));
+}
+function headerIndex(headers){
+  const H=headers.map(norm), idx={};
+  for(const [k,als] of Object.entries(COL)){
+    idx[k] = -1;
+    for(const a of als){ const p=H.indexOf(a); if(p!==-1){ idx[k]=p; break; } }
+  }
+  return idx;
+}
+function pick(row, idx, key){ return idx[key] >= 0 ? String(row[idx[key]]||'').trim() : ''; }
+function yearKey(v){ const m = String(v||'').match(/\d{4}/); return m ? m[0] : ''; }
+function isYes(v){ return /^y(es)?|ja|true|1$/i.test(String(v).trim()); }
+function isActive(status, year){
+  const s = String(status||'').toLowerCase();
+  if (/(active|current|ongoing|present|now|aktuel)/.test(s)) return true;
+  if (/^\s*\d{4}\s*[–-]\s*$/.test(String(year||''))) return true;
+  return false;
+}
+
+function buildRow(item){
+  const el=document.createElement('div');
+  el.className='row';
+  el.dataset.cat=item.cat || '';
+  el.dataset.sel=item.selected ? '1' : '0';
+  el.dataset.year=yearKey(item.year);
+  el.dataset.title=(item.job||'');
+  el.innerHTML = `
+    <div class="col cat">${item.cat||''}</div>
+    <div class="col year">${item.year||''}</div>
+    <div class="col title">
+      ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener">${item.job||''}</a>` : (item.job||'')}
+    </div>
+    <div class="col col-prod">${item.prod||''}</div>
+  `;
+  return el;
+}
+function applyFilterSort(){
+  const showActive = document.querySelector('#show-group .chip.is-active')?.dataset.show || '';
+  const sortActive = document.querySelector('#sort-group .chip.is-active')?.dataset.sort || 'year-desc';
+
+  ['upcoming-section','past-section'].forEach(secId=>{
+    const container = document.querySelector(`#${secId} .table`);
+    const rows=[...container.querySelectorAll('.row:not(.head)')];
+    rows.forEach(r=>{
+      const cat=r.dataset.cat||'';
+      const sel=r.dataset.sel==='1';
+      const match =
+        !showActive ||
+        (showActive==='Selected' && sel) ||
+        (showActive!=='Selected' && cat===showActive);
+      r.style.display = match ? '' : 'none';
+    });
+
+    const [key,dir]=sortActive.split('-');
+    const visible=rows.filter(r=>r.style.display!=='none');
+    visible.sort((a,b)=>{
+      const av=a.dataset[key]||'', bv=b.dataset[key]||'';
+      if(key==='year') return dir==='desc' ? bv.localeCompare(av) : av.localeCompare(bv);
+      return av.localeCompare(bv, undefined, {sensitivity:'base'});
+    });
+    visible.forEach(r=>container.appendChild(r));
+  });
+}
+
+(async function(){
+  const msg=document.getElementById('msg');
+  try{
+    msg.textContent='Loading…';
+    const res = await fetch(toCSV(SHEET_URL), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const rows = parseCSV(await res.text());
+    let h = findHeaderRow(rows); if (h<0) h=0;
+    const headers = rows[h];
+    const idx = headerIndex(headers);
+
+    const data = rows.slice(h+1).map(r=>{
+      const job = pick(r,idx,'job');
+      if (!job) return null;
+      const year = pick(r,idx,'year');
+      const catRaw = pick(r,idx,'cat');
+      const cat = /educ/i.test(catRaw) ? 'Educational' : (/art/i.test(catRaw) ? 'Artistical' : (catRaw || ''));
+      const selected = isYes(pick(r,idx,'sel'));
+      const status = pick(r,idx,'stat');
+      const active = isActive(status, year);
+      return { job, year, prod: pick(r,idx,'prod'), url: pick(r,idx,'url'),
+               cat, selected, active };
+    }).filter(Boolean);
+
+    const upcomingItems = data.filter(x=>x.active);
+    const pastItems     = data.filter(x=>!x.active);
+
+    const renderTo = (items, sectionId) => {
+      const table = document.querySelector(`#${sectionId} .table`);
+      const frag=document.createDocumentFragment();
+      items
+        .sort((a,b)=> yearKey(b.year).localeCompare(yearKey(a.year)))
+        .forEach(it=> frag.appendChild(buildRow(it)));
+      table.appendChild(frag);
+    };
+    renderTo(upcomingItems, 'upcoming-section');
+    renderTo(pastItems,   'past-section');
+
+    const showGroup=document.getElementById('show-group');
+    const sortGroup=document.getElementById('sort-group');
+    const setActive=(group,btn)=> group.querySelectorAll('.chip').forEach(b=>b.classList.toggle('is-active', b===btn));
+    showGroup.addEventListener('click',e=>{ if(e.target.matches('.chip')){ setActive(showGroup,e.target); applyFilterSort(); }});
+    sortGroup.addEventListener('click',e=>{ if(e.target.matches('.chip')){ setActive(sortGroup,e.target); applyFilterSort(); }});
+
+    applyFilterSort();
+    msg.textContent='';
+  }catch(err){
+    console.error(err);
+    msg.textContent='Failed to load activities. Check the sheet publishing and headers.';
+  }
+})();
+</script>
+</body>
+</html>
