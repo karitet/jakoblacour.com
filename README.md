@@ -1,25 +1,26 @@
-# Jakob la Cour — samlet site-pakke
+# jakoblacour.com — Void build
 
-Ét sammenhængende site: forside → værker → kort (Rejsen) → Record.
-Alle links er relative og koblet sammen. `index.html` er forsiden.
+Drop-in replacement for the GitHub Pages repo. All pages are self-contained HTML
+(no build step). Just commit the files at the repo root and push.
 
-## Filer
-- **index.html** — Forsiden. Kernesætningen + to døre (The Works / The Journey), værkerne, Record, kontakt.
-- **morphic-realities.html** — Værkside (den levende skabelon: Editions · Material · Publication · Practical). Medier er placeholders — se `<!-- MEDIA -->`.
-- **hybrid-sensation.html** — Værkside med rigtigt Tour Edition-indhold (fotos, turnédatoer, fakta, trailer, artist edition).
-- **map.html** — Morphic Archive (Rejsen). Læser dit Google Sheet live (fanerne Arkiv + Categories). Rediger arket → kortet opdaterer sig selv.
-- **activities.html / library.html** — Record. Dine Sheet-drevne sider.
+## Pages
+- **index.html** — fixed single-screen front. Living video reel + "Now" + unfolding panels.
+- **robotic-bloom.html / morphic-realities.html / hybrid-sensation.html** — works (dossier model).
+- **map.html** — the Morphic Archive (unchanged; light theme — pending its own Void pass).
+- **activities.html / library.html** — the Record, reskinned to Void.
 
-## Sådan lægger du den live
-1. Gå til **app.netlify.com/drop**
-2. Træk **hele mappen** (eller zip-filen) ind. Ikke én fil ad gangen — så brækker linkene.
-3. `index.html` bliver landingssiden. Du får en `…netlify.app`-URL.
+## Live data (Google Sheets — already wired)
+- **Now (front)** + **activities/library** read your activities sheet (the same one as before).
+- **Video reel (front)** reads your prox video sheet (title, src, poster, link, start, end, weight, status, aspect).
+  Rows with a YouTube/Vimeo/MP4 `src` crossfade full-screen. No rows → the still poster stays.
 
-## At fylde ind / næste skridt
-- **Medier:** I `morphic-realities.html` er hero + editions placeholders — drop billede/video ind ved MEDIA-markørerne. `hybrid-sensation.html` bruger rigtige fotos hotlinket fra jakoblacour.com; host lokale kopier på sigt for stabilitet.
-- **Publication:** ISBN- og edition-felterne er placeholders; plakaten står som stand-in-cover.
-- **Værker der mangler:** Robotic Bloom + Hyperspectral. Dublér `morphic-realities.html` (skabelonen) og fyld ind. Forsiden lister dem allerede.
-- **Kortet:** ingen handling nødvendig — det henter dit ark live.
+## To finish
+- **MR hero** (`morphic-realities`) uses a Void still as a stand-in — swap for a real production photo.
+- **HS hero** hotlinks a real 2025 tour photo from jakoblacour.com.
+- **Hero video (front):** optional — the reel covers it; a local `media/hero-loop.mp4` is not required.
+- **map.html** still uses the old light theme — give it the Void pass next.
+- Real **ISBN / edition** data drops into the Publication panels when ready.
 
-## Æstetik (hvis du udvider)
-Plomme/guld/ember · serif til display · mono til labels · sfære-glyffer ◆❂⬡✦.
+## Notes
+- Front: nav panels slide from the right. Works: the dossier sits on the left, dismiss to reveal the image.
+- Everything works on mobile portrait (simplified).
