@@ -66,7 +66,9 @@
     font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--ink);padding:5px 9px;border-radius:7px}
   .chip .g{font-size:13px}
-  .chip[aria-pressed="false"]{color:var(--faint);text-decoration:line-through;opacity:.7}
+  .chip[aria-pressed="false"]{opacity:.38}
+  .chip.toggle{border:1px solid var(--hair);border-radius:7px;color:var(--ink);letter-spacing:.18em}
+  .chip.toggle:hover{background:var(--hair2);border-color:var(--ink)}
   .chip:hover{background:var(--hair2)}
 
   .card{position:absolute;top:18px;right:18px;width:300px;max-width:calc(100% - 36px);z-index:1200;
@@ -334,13 +336,25 @@ async function load(){
   DATA.forEach(d=>{d.sphere=d.category||d.sphere||"";});
   buildLegend();renderMarkers();buildTimeline()}
 
+function allKeys(){return CATS.map(c=>norm(c.key))}
 function buildLegend(){const el=document.getElementById('legend');el.innerHTML="";
+  const tg=document.createElement('button');tg.className="chip toggle";tg.id="catToggle";
+  tg.onclick=()=>{const allOn=allKeys().every(k=>active.has(k));
+    active = allOn ? new Set() : new Set(allKeys());
+    renderMarkers();updateLegendUI()};
+  el.appendChild(tg);
   CATS.forEach(c=>{const k=norm(c.key);const b=document.createElement('button');
-    b.className="chip";b.setAttribute('aria-pressed','true');
+    b.className="chip";b.dataset.k=k;
     b.innerHTML=`<span class="g" style="color:${c.color||'inherit'}">${c.glyph||'◆'}</span>${c.label||c.key}`;
-    b.onclick=()=>{active.has(k)?active.delete(k):active.add(k);
-      b.setAttribute('aria-pressed',active.has(k));renderMarkers()};
-    el.appendChild(b)})}
+    b.onclick=()=>{ // click selects (isolates) this one; click the sole-active one again -> all
+      const sole = active.size===1 && active.has(k);
+      active = sole ? new Set(allKeys()) : new Set([k]);
+      renderMarkers();updateLegendUI()};
+    el.appendChild(b)});
+  updateLegendUI()}
+function updateLegendUI(){const allOn=allKeys().every(k=>active.has(k));
+  const tg=document.getElementById('catToggle');if(tg)tg.textContent=allOn?'None':'All';
+  document.querySelectorAll('.chip[data-k]').forEach(b=>b.setAttribute('aria-pressed',active.has(b.dataset.k)))}
 
 function mkIcon(cat){return L.divIcon({className:'',iconSize:[12,12],iconAnchor:[6,6],
   html:`<div class="gmarker" style="--mc:${(cat&&cat.color)||'#C7B9A6'}"></div>`})}
