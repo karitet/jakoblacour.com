@@ -3,6 +3,17 @@
 Drop-in replacement for the GitHub Pages repo. All pages are self-contained HTML
 (no build step). Commit the files at the repo root and push.
 
+## Approved direction
+
+MyWebsite is the long-term Git-versioned public portal. The existing expression,
+pages and Google Sheets flows are assets to preserve. Consolidation should extend
+this implementation with the Artifact system as the leading visual and technical
+reference. Small public content changes should remain editable through Google
+Sheets or Docs without requiring AI or deployment.
+
+Read the approved [publication architecture](docs/PUBLICATION-ARCHITECTURE.md)
+before changing framework, content sources, routes or visual direction.
+
 ## Pages
 - **index.html** — fixed single-screen front. Living video reel + "Now" + unfolding panels.
 - **robotic-bloom / morphic-realities / hybrid-sensation** — works (dossier model).
