@@ -1,0 +1,156 @@
+---
+const fallbackNow = [
+  { year: "2027", title: "Hyperspectral" },
+  { year: "2026", title: "Morphic Realities" }
+];
+
+const works = [
+  { title: "Morphic Realities", meta: "2026 · In performance", href: "/morphic-realities.html" },
+  { title: "Robotic Bloom", meta: "2026 · In development", href: "/robotic-bloom.html" },
+  { title: "Hybrid Sensation", meta: "2023– · Touring", href: "/hybrid-sensation.html" },
+  { title: "Hyperspectral", meta: "2027 · Upcoming", href: "#" }
+];
+---
+
+<a class="skip-link" href="#home-content">Skip to content</a>
+
+<div class="grain" aria-hidden="true"></div>
+
+<main class="stage" id="home-content">
+  <div class="poster" aria-hidden="true">
+    <img
+      src="/media/home/home-poster.jpg"
+      alt=""
+      width="1364"
+      height="1624"
+      decoding="sync"
+      fetchpriority="high"
+    />
+  </div>
+  <div class="reel-layer" id="reel-a" aria-hidden="true"></div>
+  <div class="reel-layer" id="reel-b" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="scan" aria-hidden="true"></div>
+</main>
+
+<div class="interface">
+  <img
+    class="logo"
+    src="/ui/jakob-la-cour-signature.png"
+    alt="Jakob la Cour"
+    width="162"
+    height="96"
+  />
+
+  <nav class="top-navigation" aria-label="Primary navigation">
+    <button type="button" data-open="works" aria-controls="panel-works" aria-expanded="false">Works</button>
+    <button type="button" data-open="journey" aria-controls="panel-journey" aria-expanded="false">Journey</button>
+    <button type="button" data-open="record" aria-controls="panel-record" aria-expanded="false">Record</button>
+    <button type="button" data-open="contact" aria-controls="panel-contact" aria-expanded="false">Contact</button>
+  </nav>
+
+  <button
+    class="menu-button"
+    type="button"
+    data-open="menu"
+    aria-controls="panel-menu"
+    aria-expanded="false"
+  >Menu</button>
+
+  <section class="identity" aria-labelledby="home-title">
+    <p class="kick">Ritual · Technology · Performance</p>
+    <h1 id="home-title">Staging of sensation<br />for aesthetic presence.</h1>
+  </section>
+
+  <section class="now-box" aria-labelledby="now-title">
+    <div class="now-heading">
+      <span class="now-dot" aria-hidden="true"></span>
+      <h2 id="now-title">Now</h2>
+      <span class="source-note" id="now-source-note" role="status" aria-live="polite">Saved orientation</span>
+    </div>
+    <div id="now-feed" data-source-state="fallback">
+      {fallbackNow.map((item) => (
+        <div class="now-item">
+          <span class="when">{item.year}</span>
+          <span class="what"><b>{item.title}</b></span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <p class="caption" id="reel-caption" role="status" aria-live="polite">
+    <span>Living media field</span>
+  </p>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="panel" id="panel-works" data-panel="works" aria-labelledby="panel-works-title" aria-hidden="true">
+  <button class="panel-close" type="button" data-close aria-label="Close Works panel">×</button>
+  <h2 id="panel-works-title">The Works</h2>
+  {works.map((work, index) => (
+    <a class="work-link" href={work.href}>
+      <span class="work-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+      <span>
+        <span class="work-name">{work.title}</span>
+        <span class="work-meta">{work.meta}</span>
+      </span>
+    </a>
+  ))}
+</aside>
+
+<aside class="panel" id="panel-journey" data-panel="journey" aria-labelledby="panel-journey-title" aria-hidden="true">
+  <button class="panel-close" type="button" data-close aria-label="Close Journey panel">×</button>
+  <h2 id="panel-journey-title">The Journey</h2>
+  <p class="panel-lead">The work does not only happen on stage.</p>
+  <p>Between the pieces, the practice continues — field recordings, ceremonies and seeds gathered across the Nordic land. A living map across spheres, place and time.</p>
+  <a class="panel-button" href="/map.html">
+    <img class="panel-mark" src="/ui/hypnotic-spiral-white.png" alt="" width="200" height="200" />
+    Enter the map <span aria-hidden="true">→</span>
+  </a>
+</aside>
+
+<aside class="panel" id="panel-record" data-panel="record" aria-labelledby="panel-record-title" aria-hidden="true">
+  <button class="panel-close" type="button" data-close aria-label="Close Record panel">×</button>
+  <h2 id="panel-record-title">The Record</h2>
+  <a class="record-link" href="/activities.html">
+    <span class="record-label">Activities</span>
+    <span class="record-name">The full body of work</span>
+  </a>
+  <a class="record-link" href="/library.html">
+    <span class="record-label">Library</span>
+    <span class="record-name">Writing, press & media</span>
+  </a>
+</aside>
+
+<aside class="panel" id="panel-contact" data-panel="contact" aria-labelledby="panel-contact-title" aria-hidden="true">
+  <button class="panel-close" type="button" data-close aria-label="Close Contact panel">×</button>
+  <h2 id="panel-contact-title">Studio</h2>
+  <img
+    class="studio-lockup"
+    src="/ui/jakob-la-cour-studio-logo.png"
+    alt="Jakob la Cour Studio"
+    width="520"
+    height="321"
+  />
+  <p class="contact-line">
+    For festivals, venues & co-production<br />
+    <a href="mailto:info@jakoblacour.com">info@jakoblacour.com</a><br />
+    <a href="tel:+4542599911">+45 425 999 11</a>
+  </p>
+</aside>
+
+<aside class="panel panel-menu" id="panel-menu" data-panel="menu" aria-labelledby="panel-menu-title" aria-hidden="true">
+  <button class="panel-close" type="button" data-close aria-label="Close menu">×</button>
+  <h2 id="panel-menu-title">Menu</h2>
+  <button class="menu-link" type="button" data-open="works">Works</button>
+  <button class="menu-link" type="button" data-open="journey">Journey</button>
+  <button class="menu-link" type="button" data-open="record">Record</button>
+  <button class="menu-link" type="button" data-open="contact">Contact</button>
+</aside>
+
+<noscript>
+  <div class="noscript-note">Live media and current activities require JavaScript. The saved orientation and all primary navigation remain available.</div>
+</noscript>
+
+<script src="../scripts/home.js"></script>

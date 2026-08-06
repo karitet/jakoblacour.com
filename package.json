@@ -1,0 +1,26 @@
+{
+  "name": "jakoblacour-com",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/astro-cli.mjs dev",
+    "build": "node scripts/astro-cli.mjs build && node scripts/copy-legacy-pages.mjs && node scripts/verify-build-output.mjs",
+    "preview": "node scripts/astro-cli.mjs preview",
+    "lint": "node scripts/astro-cli.mjs check",
+    "test": "node --test",
+    "verify:data": "node scripts/verify-google-data.mjs",
+    "check": "node scripts/astro-cli.mjs check && node --test && node scripts/astro-cli.mjs build && node scripts/copy-legacy-pages.mjs && node scripts/verify-build-output.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.1.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.8.3"
+  }
+}
