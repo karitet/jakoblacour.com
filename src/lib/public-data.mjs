@@ -1,0 +1,229 @@
+const REEL_COLUMNS = Object.freeze({
+  title: ["title", "name"],
+  src: ["src", "source", "video", "url"],
+  poster: ["poster", "image"],
+  link: ["link", "href"],
+  start: ["start", "in"],
+  end: ["end", "out"],
+  weight: ["weight", "prio", "priority"],
+  status: ["status", "publish"],
+  aspect: ["aspect", "ratio", "ar"]
+});
+
+const ACTIVITY_COLUMNS = Object.freeze({
+  job: ["job title", "job titel", "title", "titel", "work", "værk", "vaerk"],
+  year: ["year", "aar", "år", "date", "dato"],
+  production: [
+    "production company",
+    "company",
+    "producer",
+    "producent",
+    "produktion",
+    "produktionsselskab",
+    "produktion selskab"
+  ],
+  url: ["url", "link", "href"],
+  category: [
+    "category",
+    "kategori",
+    "artistical/educational",
+    "artistic/educational",
+    "type"
+  ],
+  selected: ["selected", "udvalgt", "yes/no", "selected?", "is selected"],
+  status: ["status", "state", "aktiv", "active/past"]
+});
+
+export function normalizeHeader(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function parseCsv(text) {
+  const rows = [];
+  let field = "";
+  let quoted = false;
+  let row = [];
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+
+    if (char === '"' && quoted && next === '"') {
+      field += '"';
+      index += 1;
+      continue;
+    }
+
+    if (char === '"') {
+      quoted = !quoted;
+      continue;
+    }
+
+    if (char === "," && !quoted) {
+      row.push(field);
+      field = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !quoted) {
+      if (field.length || row.length) {
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = "";
+      }
+      continue;
+    }
+
+    field += char;
+  }
+
+  if (field.length || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows.filter((cells) =>
+    cells.length > 0 && cells.some((cell) => String(cell).trim() !== "")
+  );
+}
+
+function indexColumns(headers, aliases) {
+  const normalized = headers.map(normalizeHeader);
+  return Object.fromEntries(
+    Object.entries(aliases).map(([key, options]) => [
+      key,
+      options.map(normalizeHeader).map((name) => normalized.indexOf(name)).find((value) => value >= 0) ?? -1
+    ])
+  );
+}
+
+function pick(row, indexes, key) {
+  const index = indexes[key];
+  return index >= 0 ? String(row[index] ?? "").trim() : "";
+}
+
+function findHeaderRow(rows, aliases) {
+  const known = Object.values(aliases).flat().map(normalizeHeader);
+  const index = rows.findIndex((row) => row.map(normalizeHeader).some((cell) => known.includes(cell)));
+  return index >= 0 ? index : 0;
+}
+
+export function parseReelCsv(text) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return [];
+
+  const headerRow = findHeaderRow(rows, REEL_COLUMNS);
+  const indexes = indexColumns(rows[headerRow], REEL_COLUMNS);
+
+  return rows
+    .slice(headerRow + 1)
+    .map((row) => {
+      const title = pick(row, indexes, "title");
+      const src = safeMediaUrl(pick(row, indexes, "src"));
+      if (!title || !src) return null;
+
+      const start = Number.parseFloat(pick(row, indexes, "start"));
+      const end = Number.parseFloat(pick(row, indexes, "end"));
+      const weight = Number.parseFloat(pick(row, indexes, "weight"));
+      const aspect = Number.parseFloat(pick(row, indexes, "aspect"));
+      const status = (pick(row, indexes, "status") || "publish").toLowerCase();
+
+      if (status !== "publish") return null;
+
+      return {
+        title,
+        src,
+        poster: safeMediaUrl(pick(row, indexes, "poster")),
+        link: safePublicUrl(pick(row, indexes, "link")),
+        start: Number.isFinite(start) && start >= 0 ? start : 0,
+        end: Number.isFinite(end) && end > start ? end : null,
+        weight: Number.isFinite(weight) && weight > 0 ? weight : 1,
+        aspect: Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9
+      };
+    })
+    .filter(Boolean);
+}
+
+export function parseActivitiesCsv(text) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return [];
+
+  const headerRow = findHeaderRow(rows, ACTIVITY_COLUMNS);
+  const indexes = indexColumns(rows[headerRow], ACTIVITY_COLUMNS);
+
+  return rows
+    .slice(headerRow + 1)
+    .map((row) => {
+      const job = pick(row, indexes, "job");
+      if (!job) return null;
+
+      const year = pick(row, indexes, "year");
+      const status = pick(row, indexes, "status").toLowerCase();
+      const active = /(active|current|ongoing|present|now|aktuel|upcoming|kommende)/.test(status)
+        || /^\s*\d{4}\s*[–-]\s*$/.test(year);
+
+      return {
+        job,
+        year,
+        production: pick(row, indexes, "production"),
+        url: safePublicUrl(pick(row, indexes, "url")),
+        category: pick(row, indexes, "category"),
+        selected: /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "selected")),
+        status,
+        active
+      };
+    })
+    .filter(Boolean);
+}
+
+export function currentActivities(items, limit = 4) {
+  return items
+    .filter((item) => item.active)
+    .sort((a, b) => String(b.year).localeCompare(String(a.year)))
+    .slice(0, limit);
+}
+
+export function safePublicUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw, "https://jakoblacour.com/");
+    return ["http:", "https:", "mailto:", "tel:"].includes(url.protocol) ? raw : "";
+  } catch {
+    return "";
+  }
+}
+
+export function safeMediaUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw, "https://jakoblacour.com/");
+    return ["http:", "https:"].includes(url.protocol) ? raw : "";
+  } catch {
+    return "";
+  }
+}
+
+export function weightedShuffle(items, random = Math.random) {
+  const bag = [];
+  for (const item of items) {
+    const repetitions = Math.max(1, Math.round(item.weight || 1));
+    for (let index = 0; index < repetitions; index += 1) bag.push(item);
+  }
+
+  for (let index = bag.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [bag[index], bag[swapIndex]] = [bag[swapIndex], bag[index]];
+  }
+
+  return bag;
+}

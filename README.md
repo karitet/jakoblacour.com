@@ -1,7 +1,9 @@
-# jakoblacour.com — Void build
+# jakoblacour.com — MyWebsite
 
-Drop-in replacement for the GitHub Pages repo. All pages are self-contained HTML
-(no build step). Commit the files at the repo root and push.
+The public site is being consolidated incrementally. Phase 1 adds an Astro-built
+Home while preserving every existing self-contained HTML page and the original
+static Home as a rollback reference. It does not change WordPress, the production
+domain, DNS or hosting.
 
 ## Approved direction
 
@@ -15,7 +17,8 @@ Read the approved [publication architecture](docs/PUBLICATION-ARCHITECTURE.md)
 before changing framework, content sources, routes or visual direction.
 
 ## Pages
-- **index.html** — fixed single-screen front. Living video reel + "Now" + unfolding panels.
+- **Astro `/`** — fixed single-screen front. Living video reel + "Now" + unfolding panels.
+- **legacy/index.html** — generated rollback copy of the original static Home.
 - **robotic-bloom / morphic-realities / hybrid-sensation** — works (dossier model).
 - **map.html — "Seeds"** — a living field of practice & process, Void-skinned (dark map).
   Quarter-size markers, practice categories, and threads between related points.
@@ -31,6 +34,37 @@ before changing framework, content sources, routes or visual direction.
     (e.g. a work and its field recordings). Optional.
   (The old `sphere` column still works as a fallback until you switch over.)
 
+Home renders a complete static orientation first, then progressively replaces
+the saved media still and Now items with Google data. If either request fails,
+the saved orientation remains visible. Use `/?data=fallback` for a deterministic
+fallback preview.
+
+## Local development
+
+Requires Node.js 22.12 or newer and pnpm 11.
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Open the local URL shown in the terminal. For the production build:
+
+```bash
+pnpm lint
+pnpm test
+pnpm run verify:data
+pnpm build
+pnpm preview
+```
+
+The static result is written to `dist/`. The build copies the six untouched
+legacy routes to their existing `.html` URLs and saves the original root
+`index.html` as `dist/legacy/index.html`.
+
+See [Phase 1 notes](docs/ASTRO-PHASE-1.md) and the complete
+[source map](docs/SOURCE-MAP.md).
+
 ## To finish
 - **MR hero** (`morphic-realities`) uses a Void still as a stand-in — swap for a real production photo.
 - Repopulate the map sheet with the new **category** values (and optional **thread** ids).
@@ -40,3 +74,5 @@ before changing framework, content sources, routes or visual direction.
 ## Notes
 - Front: nav panels slide from the right. Works: the dossier sits on the left, dismiss to reveal the image.
 - Everything works on mobile portrait (simplified).
+- The root-level HTML files are the frozen pre-Astro reference. Do not delete
+  them until a later migration phase explicitly replaces each route.
