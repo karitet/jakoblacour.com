@@ -4,20 +4,23 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const dist = resolve(root, "dist");
 const legacy = resolve(dist, "legacy");
-const legacyPages = [
-  "activities.html",
+const copiedLegacyPages = [
   "hybrid-sensation.html",
   "library.html",
   "map.html",
   "morphic-realities.html",
   "robotic-bloom.html"
 ];
+const rollbackPages = ["index.html", "activities.html"];
 
 await mkdir(legacy, { recursive: true });
-await copyFile(resolve(root, "index.html"), resolve(legacy, "index.html"));
 
-for (const page of legacyPages) {
+for (const page of copiedLegacyPages) {
   await copyFile(resolve(root, page), resolve(dist, page));
 }
 
-console.log(`Copied ${legacyPages.length} unchanged legacy routes and the rollback home.`);
+for (const page of rollbackPages) {
+  await copyFile(resolve(root, page), resolve(legacy, page));
+}
+
+console.log(`Copied ${copiedLegacyPages.length} unchanged legacy routes and ${rollbackPages.length} rollback pages.`);

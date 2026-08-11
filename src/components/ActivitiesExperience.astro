@@ -1,0 +1,97 @@
+---
+const filters = [
+  { value: "all", label: "All" },
+  { value: "selected", label: "Selected" },
+  { value: "Artistical", label: "Artistical" },
+  { value: "Educational", label: "Educational" }
+];
+
+const sorts = [
+  { value: "year-desc", label: "Year ↓" },
+  { value: "year-asc", label: "Year ↑" },
+  { value: "title-asc", label: "Title A–Z" }
+];
+---
+
+<a class="skip-link" href="#activities-content">Skip to activities</a>
+
+<main class="activities" id="activities-content" data-source-state="loading">
+  <header class="activities-header">
+    <a class="front-link" href="/">← Front</a>
+    <p class="activities-kicker">Record</p>
+    <h1>Activities</h1>
+    <p class="activities-source" id="activities-source" role="status" aria-live="polite">
+      Live public record
+    </p>
+  </header>
+
+  <section class="activity-controls" aria-label="Activity controls">
+    <div class="control-group">
+      <h2>Show</h2>
+      <div class="control-buttons" role="group" aria-label="Show activities">
+        {filters.map((filter) => (
+          <button
+            class="control-button"
+            type="button"
+            data-activity-filter={filter.value}
+            aria-pressed={filter.value === "selected" ? "true" : "false"}
+          >{filter.label}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h2>Sort</h2>
+      <div class="control-buttons" role="group" aria-label="Sort activities">
+        {sorts.map((sort) => (
+          <button
+            class="control-button"
+            type="button"
+            data-activity-sort={sort.value}
+            aria-pressed={sort.value === "year-desc" ? "true" : "false"}
+          >{sort.label}</button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="activity-section" aria-labelledby="upcoming-title">
+    <div class="section-heading">
+      <p class="section-index" aria-hidden="true">01</p>
+      <h2 id="upcoming-title">Upcoming</h2>
+    </div>
+    <div class="activity-table" role="table" aria-label="Upcoming projects">
+      <div class="activity-row activity-row--head" role="row">
+        <span role="columnheader">Category</span>
+        <span role="columnheader">Year</span>
+        <span role="columnheader">Job title</span>
+        <span role="columnheader">Production company</span>
+      </div>
+      <div data-activity-rows="upcoming"></div>
+    </div>
+    <p class="activity-empty" data-activity-empty="upcoming">Loading the public record…</p>
+  </section>
+
+  <section class="activity-section" aria-labelledby="past-title">
+    <div class="section-heading">
+      <p class="section-index" aria-hidden="true">02</p>
+      <h2 id="past-title">Past</h2>
+    </div>
+    <div class="activity-table" role="table" aria-label="Past projects">
+      <div class="activity-row activity-row--head" role="row">
+        <span role="columnheader">Category</span>
+        <span role="columnheader">Year</span>
+        <span role="columnheader">Job title</span>
+        <span role="columnheader">Production company</span>
+      </div>
+      <div data-activity-rows="past"></div>
+    </div>
+    <p class="activity-empty" data-activity-empty="past">Loading the public record…</p>
+  </section>
+</main>
+
+<noscript>
+  <p class="noscript-note">This page’s public activity record requires JavaScript. Its source remains available through the existing Google Sheet.</p>
+</noscript>
+
+<script src="../scripts/activities.js"></script>
