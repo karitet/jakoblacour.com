@@ -111,15 +111,12 @@ CSV, tab targeting and fetch fallback.
 
 ## Public access status — 2026-08-11
 
-The anonymous CSV/GViz request above returned HTTP `401` and Google login HTML
-during Phase 4. No sharing setting was changed automatically.
+Verified after the spreadsheet’s General access was set to **Anyone with the
+link · Viewer**. A cookie- and credential-free HTTP client receives HTTP `200`,
+`text/csv; charset=utf-8` and the exact v0.1 header from the endpoint above.
+The live adapter resolves its published English values successfully; no further
+sharing or publishing action is required.
 
-Jakob’s required manual action is: open the spreadsheet, choose **Share**, and
-under **General access** choose **Anyone with the link** with role **Viewer**;
-click **Done**. Then retest the exact endpoint above in a private browser window
-or with a logged-out request. Google documents that this makes the linked file
-available to anyone while Viewer access prevents edits; only do this after
-confirming every sheet cell is deliberate public material. If Workspace policy
-does not allow link sharing, use **File → Share → Publish to web**, select only
-the `Content` tab and CSV, then provide the generated public CSV URL so the
-configured endpoint can be updated and retested.
+Viewer access prevents edits, but everyone who has the link can read the
+workbook. Confirm that every cell remains deliberate public material; `notes`
+and `source_ref` are withheld by the website but are not private storage.
