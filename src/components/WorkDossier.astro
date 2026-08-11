@@ -1,0 +1,194 @@
+---
+import { publicArchiveSources } from "../data/works.mjs";
+
+const work: any = Astro.props.work;
+const archiveSources: any[] = publicArchiveSources(work);
+---
+
+<a class="work-skip-link" href="#work-content">Skip to dossier</a>
+
+<div class="work-grain" aria-hidden="true"></div>
+
+<header class="work-masthead">
+  <a href="/" class="work-home-link">Jakob la Cour</a>
+  <nav class="work-section-nav" aria-label="Dossier sections">
+    <a href="#situation">Situation</a>
+    <a href="#form">Form</a>
+    <a href="#trace">Trace</a>
+    <a href="#transmission">Transmission</a>
+  </nav>
+  <p>Phase 5 review candidate</p>
+</header>
+
+<main id="work-content">
+  <section class="work-hero" aria-labelledby="work-title">
+    <figure class="work-hero-media">
+      <div class="work-media-fallback" aria-hidden="true">
+        <span>Hybrid Sensation · saved local image unavailable</span>
+      </div>
+      <img
+        src={work.hero.src}
+        alt={work.hero.alt}
+        width={work.hero.width}
+        height={work.hero.height}
+        decoding="async"
+        fetchpriority="high"
+      />
+    </figure>
+
+    <div class="work-hero-copy">
+      <p class="work-kicker">Work family / 01</p>
+      <h1 id="work-title">{work.title.value}</h1>
+      <p class="work-type">{work.workType.value}</p>
+      <p class="work-summary">{work.summary.value}</p>
+      <dl class="work-hero-facts">
+        <div>
+          <dt>Current editorial orientation</dt>
+          <dd>{work.currentOrientation.value}</dd>
+        </div>
+        <div>
+          <dt>Family</dt>
+          <dd>{work.familyTitle.value}</dd>
+        </div>
+      </dl>
+      <div class="work-actions">
+        <a href="#form">Read the editions <span aria-hidden="true">↓</span></a>
+        <a class="work-legacy-link" href={work.legacyHref}>Open preserved legacy dossier <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="work-intro work-section" id="situation" aria-labelledby="work-intro-title">
+    <p class="work-section-label">Situation</p>
+    <div>
+      <h2 id="work-intro-title">{work.situation.value}</h2>
+      <p>One work family, two documented editions. Their shared artistic lineage stays legible while format, duration and credits remain distinct.</p>
+    </div>
+  </section>
+
+  <section class="work-section work-editions" id="form" aria-labelledby="editions-title">
+    <div class="work-section-heading">
+      <p class="work-section-label">Form</p>
+      <h2 id="editions-title">Versions in relation</h2>
+    </div>
+
+    <nav class="edition-navigation" aria-label="Edition navigation">
+      {work.editions.map((edition: any, index: number) => (
+        <a href={`#edition-${edition.id}`}><span>{String(index + 1).padStart(2, "0")}</span>{edition.title.value}</a>
+      ))}
+    </nav>
+
+    <div class="edition-list">
+      {work.editions.map((edition: any, index: number) => (
+        <article class="edition" id={`edition-${edition.id}`} aria-labelledby={`edition-title-${edition.id}`}>
+          <p class="edition-index">{String(index + 1).padStart(2, "0")}</p>
+          <div class="edition-core">
+            <h3 id={`edition-title-${edition.id}`}>{edition.title.value}</h3>
+            <p>{edition.descriptor.value}</p>
+          </div>
+          <dl class="edition-facts">
+            {edition.facts.map((item: any) => (
+              <div>
+                <dt>{item.label}</dt>
+                <dd>{item.detail.value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {edition.historicalDates && (
+            <div class="edition-dates">
+              <p class="edition-subheading">Documented 2026 tour dates</p>
+              <ol>
+                {edition.historicalDates.map((event: any) => (
+                  <li>
+                    <span>{event.venue}</span>
+                    <time>{event.date}</time>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="work-section work-credits" id="trace" aria-labelledby="credits-title">
+    <div class="work-section-heading">
+      <p class="work-section-label">Trace</p>
+      <h2 id="credits-title">Named work, named contributions.</h2>
+    </div>
+
+    <div class="credit-editions">
+      {work.editions.map((edition: any) => (
+        <article class="credit-edition" aria-labelledby={`credits-${edition.id}`}>
+          <h3 id={`credits-${edition.id}`}>{edition.title.value}</h3>
+          <dl>
+            {edition.credits.map((credit: any) => (
+              <div>
+                <dt>{credit.role}</dt>
+                <dd>{credit.people.join(" · ")}</dd>
+              </div>
+            ))}
+          </dl>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="work-section work-care" aria-labelledby="care-title">
+    <div class="work-section-heading">
+      <p class="work-section-label">Audience and access</p>
+      <h2 id="care-title">Information held with the work.</h2>
+    </div>
+
+    <div class="care-editions">
+      {work.editions.map((edition: any) => (
+        <article aria-labelledby={`care-${edition.id}`}>
+          <h3 id={`care-${edition.id}`}>{edition.title.value}</h3>
+          <ul>
+            {edition.audience.map((notice: any) => <li>{notice.value}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="work-section work-reception" id="transmission" aria-labelledby="reception-title">
+    <div class="work-section-heading">
+      <p class="work-section-label">Transmission</p>
+      <h2 id="reception-title">Reviews retained as references.</h2>
+    </div>
+
+    <ol class="review-list">
+      {work.reviews.map((review: any) => (
+        <li>
+          <a href={review.url} rel="noreferrer">
+            <span class="review-publication">{review.publication}</span>
+            <span class="review-title">{review.title}</span>
+            {review.rating && <span class="review-rating">{review.rating}</span>}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="work-provenance" aria-labelledby="provenance-title">
+    <p class="work-section-label">Source trail</p>
+    <h2 id="provenance-title">This is a static, source-aware public record.</h2>
+    <p>
+      Current meaning is reconciled editorially. Historical public facts, media and links stay traceable to the WordPress archive rather than being treated as a live editorial source.
+    </p>
+    <ul>
+      {archiveSources.map((source: any) => (
+        <li><a href={source.url} rel="noreferrer">{source.label} <span aria-hidden="true">↗</span></a></li>
+      ))}
+    </ul>
+    <p class="work-provenance-note">Archive sources checked 11 August 2026. The legacy dossier remains intact at the original route.</p>
+  </section>
+</main>
+
+<footer class="work-footer">
+  <a href="/">Back to the living field</a>
+  <span>Hybrid Sensation / Phase 5 review candidate</span>
+</footer>

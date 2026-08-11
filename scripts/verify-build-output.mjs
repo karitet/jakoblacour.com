@@ -33,13 +33,17 @@ for (const page of rollbackPages) {
   }
 }
 
-const [astroHome, astroActivities, astroLibrary, legacyActivities, legacyLibrary] = await Promise.all([
+const [astroHome, astroActivities, astroLibrary, workDossier, publicCatalogBytes, legacyActivities, legacyLibrary] = await Promise.all([
   readFile(resolve(root, "dist", "index.html"), "utf8"),
   readFile(resolve(root, "dist", "activities.html"), "utf8"),
   readFile(resolve(root, "dist", "library.html"), "utf8"),
+  readFile(resolve(root, "dist", "works", "hybrid-sensation.html"), "utf8"),
+  readFile(resolve(root, "dist", "catalog", "works.v0.1.json"), "utf8"),
   readFile(resolve(root, "activities.html"), "utf8"),
   readFile(resolve(root, "library.html"), "utf8")
 ]);
+
+const publicCatalog = JSON.parse(publicCatalogBytes);
 
 if (astroHome.includes("data:image") || astroHome.includes(";base64,")) {
   throw new Error("The Astro Home contains embedded base64 media.");
@@ -98,4 +102,36 @@ if (!astroLibrary.includes("Saved public record")) {
   throw new Error("The Astro Library route is missing its static fallback orientation.");
 }
 
-console.log("Verified Astro routes, ordinary media and byte-identical legacy rollback pages.");
+if (!workDossier.includes('/media/works/hybrid-sensation-stage.jpg')) {
+  throw new Error("The Hybrid Sensation work dossier is missing its local media asset.");
+}
+
+if (!workDossier.includes("saved local image unavailable")) {
+  throw new Error("The Hybrid Sensation work dossier is missing its local-media fallback.");
+}
+
+if (workDossier.includes("https://jakoblacour.com/wp-content/")) {
+  throw new Error("The Hybrid Sensation work dossier still embeds WordPress media.");
+}
+
+if (!workDossier.includes("Source trail") || !workDossier.includes("/hybrid-sensation.html")) {
+  throw new Error("The Hybrid Sensation work dossier is missing source or legacy-route orientation.");
+}
+
+for (const section of ["Situation", "Form", "Trace", "Transmission"]) {
+  if (!workDossier.includes(section)) throw new Error(`The Hybrid Sensation work dossier is missing ${section}.`);
+}
+
+if (publicCatalog.schema !== "jakoblacour.public-catalog" || publicCatalog.version !== "0.1") {
+  throw new Error("The generated Public Catalog has an unexpected schema or version.");
+}
+
+if (publicCatalog.entries.length !== 1 || publicCatalog.entries[0].id !== "work-hybrid-sensation") {
+  throw new Error("The generated Public Catalog is missing the Hybrid Sensation entry.");
+}
+
+if (publicCatalogBytes.includes("sourceIds") || publicCatalogBytes.includes("requires_jakob")) {
+  throw new Error("The generated Public Catalog exposes internal or unresolved work data.");
+}
+
+console.log("Verified Astro routes, local work media, Public Catalog and byte-identical legacy rollback pages.");

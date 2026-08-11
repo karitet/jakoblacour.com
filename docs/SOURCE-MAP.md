@@ -12,7 +12,7 @@ does not authorize publishing from MyContext, MyLog or MyMemory.
 | Surface | Public function | Current implementation | Runtime source | Phase 1 treatment |
 | --- | --- | --- | --- | --- |
 | Home | Living field, current orientation and primary navigation | `src/pages/index.astro` | Video sheet, Activities sheet and mapped Site Content keys | Ported to Astro with saved fallback |
-| Works | Concentrated dossiers | `morphic-realities.html`, `robotic-bloom.html`, `hybrid-sensation.html` | Repository markup and embedded media | Preserved unchanged |
+| Works | Concentrated dossiers | Legacy `morphic-realities.html`, `robotic-bloom.html`, `hybrid-sensation.html`; Astro candidate `src/pages/works/[slug].astro` | Repository work model, reconciled against approved MyContext meaning and historical WordPress sources | Existing routes preserved; `/works/hybrid-sensation.html` is the Phase 5 candidate |
 | Journey / Seeds | Geographic, temporal and relational field | `map.html` | `Arkiv` and `Categories` sheet tabs | Preserved unchanged |
 | Activities | Filterable professional record | `src/pages/activities.astro` | Activities sheet | Astro candidate at `/activities.html`; original route retained at `/legacy/activities.html` as rollback |
 | Library | Publications, press and documents | `src/pages/library.astro` | Library sheet | Astro candidate at `/library.html`; original route retained at `/legacy/library.html` as rollback |
@@ -24,6 +24,23 @@ Home connects visitors to Works, Journey, Activities, Library and Contact. The
 three Works routes remain dossiers. Journey / Seeds connects practices in place
 and time. Activities and Library form the Record. Artifacts remain independent
 permanent portals rather than a generic website section.
+
+## Works (Phase 5)
+
+Source model: `src/data/works.mjs`
+
+The generated Work route is deliberately source-aware. A record has a stable
+work id, slug, work-family id, publication gate, edition-specific credits and
+facts, a preserved legacy route and explicit source ids for reconciled fields.
+Approved MyContext direction guides current meaning during editorial work; it is
+not read at runtime. WordPress remains a historical public archive source for
+legacy content, media and URLs. The full source inventory and reconciliation
+decisions are recorded in [Astro Phase 5 Works](ASTRO-PHASE-5-WORKS.md).
+
+Public Catalog v0.1 is generated from that model at
+`dist/catalog/works.v0.1.json`. It exposes only publish-gated work data, local
+media and public archive provenance; it does not publish MyContext references,
+internal source ids or unresolved review blockers.
 
 ## Home video reel
 

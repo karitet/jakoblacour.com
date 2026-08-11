@@ -20,6 +20,8 @@ before changing framework, content sources, routes or visual direction.
 - **Astro `/`** — fixed single-screen front. Living video reel + "Now" + unfolding panels.
 - **Astro `/activities.html`** — live, filterable Activities record with a static page frame if Google is unavailable.
 - **Astro `/library.html`** — live, filterable publications, press and documents record with a saved public fallback.
+- **Astro `/works/hybrid-sensation.html`** — source-aware Hybrid Sensation work-family candidate; original and Tour Edition remain distinct within one dossier.
+- **Public Catalog v0.1** — generated at build time as `dist/catalog/works.v0.1.json`; it currently projects one publish-gated work-family record.
 - **legacy/index.html** — generated rollback copy of the original static Home.
 - **legacy/activities.html** — generated rollback copy of the original Activities route.
 - **legacy/library.html** — generated rollback copy of the original Library route.
@@ -77,7 +79,7 @@ Activities and Library source pages as `dist/legacy/index.html`,
 
 See [Phase 1 notes](docs/ASTRO-PHASE-1.md), [Phase 2 notes](docs/ASTRO-PHASE-2-ACTIVITIES.md),
 [Phase 3 notes](docs/ASTRO-PHASE-3-LIBRARY.md), [Phase 4 Site Content](docs/ASTRO-PHASE-4-SITE-CONTENT.md)
-and the complete [source map](docs/SOURCE-MAP.md).
+and the complete [source map](docs/SOURCE-MAP.md). Phase 5's Works reconciliation and data contract are recorded in [Astro Phase 5 Works](docs/ASTRO-PHASE-5-WORKS.md).
 
 ## To finish
 - **MR hero** (`morphic-realities`) uses a Void still as a stand-in — swap for a real production photo.
