@@ -15,7 +15,7 @@ does not authorize publishing from MyContext, MyLog or MyMemory.
 | Works | Concentrated dossiers | `morphic-realities.html`, `robotic-bloom.html`, `hybrid-sensation.html` | Repository markup and embedded media | Preserved unchanged |
 | Journey / Seeds | Geographic, temporal and relational field | `map.html` | `Arkiv` and `Categories` sheet tabs | Preserved unchanged |
 | Activities | Filterable professional record | `src/pages/activities.astro` | Activities sheet | Astro candidate at `/activities.html`; original route retained at `/legacy/activities.html` as rollback |
-| Library | Publications, press and documents | `library.html` | Library sheet | Preserved unchanged |
+| Library | Publications, press and documents | `src/pages/library.astro` | Library sheet | Astro candidate at `/library.html`; original route retained at `/legacy/library.html` as rollback |
 | Artifacts | Deep media and ritual portals | Separate `karitet/jakob-la-cour-artifacts` repository | Validated artifact manifests and local media | Linked architectural reference; not copied into this site |
 | About | Clear public orientation | No dedicated current route | Not yet defined | Proposed `Site Content` keys only |
 | Contact | Festival, venue and co-production access | Home Contact panel | Repository markup | Preserved on Astro Home |

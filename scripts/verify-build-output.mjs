@@ -5,12 +5,11 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const copiedLegacyPages = [
   "hybrid-sensation.html",
-  "library.html",
   "map.html",
   "morphic-realities.html",
   "robotic-bloom.html"
 ];
-const rollbackPages = ["index.html", "activities.html"];
+const rollbackPages = ["index.html", "activities.html", "library.html"];
 
 function digest(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
@@ -34,10 +33,12 @@ for (const page of rollbackPages) {
   }
 }
 
-const [astroHome, astroActivities, legacyActivities] = await Promise.all([
+const [astroHome, astroActivities, astroLibrary, legacyActivities, legacyLibrary] = await Promise.all([
   readFile(resolve(root, "dist", "index.html"), "utf8"),
   readFile(resolve(root, "dist", "activities.html"), "utf8"),
-  readFile(resolve(root, "activities.html"), "utf8")
+  readFile(resolve(root, "dist", "library.html"), "utf8"),
+  readFile(resolve(root, "activities.html"), "utf8"),
+  readFile(resolve(root, "library.html"), "utf8")
 ]);
 
 if (astroHome.includes("data:image") || astroHome.includes(";base64,")) {
@@ -61,6 +62,18 @@ if (digest(astroActivities) === digest(legacyActivities)) {
 
 if (!astroActivities.includes('data-source-state="loading"')) {
   throw new Error("The Astro Activities route is missing its static live-data shell.");
+}
+
+if (digest(astroLibrary) === digest(legacyLibrary)) {
+  throw new Error("The Astro Library route was replaced by the legacy source.");
+}
+
+if (!astroLibrary.includes('data-source-state="loading"')) {
+  throw new Error("The Astro Library route is missing its static live-data shell.");
+}
+
+if (!astroLibrary.includes("Saved public record")) {
+  throw new Error("The Astro Library route is missing its static fallback orientation.");
 }
 
 console.log("Verified Astro routes, ordinary media and byte-identical legacy rollback pages.");

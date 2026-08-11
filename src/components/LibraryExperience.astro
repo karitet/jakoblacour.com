@@ -1,0 +1,98 @@
+---
+import { LIBRARY_FALLBACK_ITEMS } from "../data/library-fallback.mjs";
+import { libraryTypes, sortLibraryItems } from "../lib/public-data.mjs";
+
+const filters = libraryTypes(LIBRARY_FALLBACK_ITEMS);
+const items = sortLibraryItems(LIBRARY_FALLBACK_ITEMS);
+const sorts = [
+  { value: "date-desc", label: "Date ↓" },
+  { value: "date-asc", label: "Date ↑" },
+  { value: "type-asc", label: "Type A–Z" },
+  { value: "title-asc", label: "Title A–Z" }
+];
+---
+
+<a class="skip-link" href="#library-content">Skip to Library</a>
+
+<main class="library" id="library-content" data-source-state="loading">
+  <header class="library-header">
+    <a class="front-link" href="/">← Front</a>
+    <p class="library-kicker">Record / 02</p>
+    <h1>Library</h1>
+    <p class="library-intro">Publications, press, documents and archival traces.</p>
+    <p class="library-source" id="library-source" role="status" aria-live="polite">
+      Saved public record — loading live data
+    </p>
+  </header>
+
+  <section class="library-controls" aria-label="Library controls">
+    <div class="control-group">
+      <h2>Show</h2>
+      <div class="control-buttons" data-library-filters role="group" aria-label="Show Library entries">
+        <button class="control-button" type="button" data-library-filter="all" aria-pressed="true">All</button>
+        {filters.map((filter) => (
+          <button class="control-button" type="button" data-library-filter={filter} aria-pressed="false">
+            {filter}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h2>Sort</h2>
+      <div class="control-buttons" role="group" aria-label="Sort Library entries">
+        {sorts.map((sort) => (
+          <button
+            class="control-button"
+            type="button"
+            data-library-sort={sort.value}
+            aria-pressed={sort.value === "date-desc" ? "true" : "false"}
+          >{sort.label}</button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="library-record" aria-labelledby="library-record-title">
+    <div class="section-heading">
+      <p class="section-index" aria-hidden="true">Archive</p>
+      <h2 id="library-record-title">Public record</h2>
+    </div>
+    <div class="library-table" role="table" aria-label="Library list">
+      <div class="library-row library-row--head" role="row">
+        <span role="columnheader">Type</span>
+        <span role="columnheader">Date</span>
+        <span role="columnheader">Title / document</span>
+        <span role="columnheader">Outlet</span>
+      </div>
+      <div data-library-rows>
+        {items.map((item) => (
+          <article class="library-row" data-library-row role="row">
+            <div class="library-type" role="cell">
+              <span>{item.type || "—"}</span>
+              {item.language && <small>{item.language}</small>}
+            </div>
+            <time class="library-date" datetime={item.date || undefined} role="cell">{item.date || "—"}</time>
+            <div class="library-title" role="cell">
+              {item.url ? (
+                <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
+              ) : <span>{item.title}</span>}
+              {item.quote && <p>{item.quote}</p>}
+            </div>
+            <div class="library-outlet" role="cell">
+              <span>{item.outlet || "—"}</span>
+              {item.project && <small>{item.project}</small>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+    <p class="library-empty" data-library-empty hidden>No matching Library entries.</p>
+  </section>
+</main>
+
+<noscript>
+  <p class="noscript-note">A saved public Library record remains available here. Live updates require JavaScript.</p>
+</noscript>
+
+<script src="../scripts/library.js"></script>
