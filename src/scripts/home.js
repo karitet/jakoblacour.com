@@ -5,6 +5,7 @@ import {
   parseReelCsv,
   weightedShuffle
 } from "../lib/public-data.mjs";
+import { loadSiteContent } from "../lib/site-content.mjs";
 
 const forcedFallback = new URLSearchParams(window.location.search).get("data") === "fallback";
 
@@ -75,6 +76,80 @@ async function loadNow() {
     note.textContent = "Saved orientation";
     console.warn("Now source unavailable; retaining saved orientation.", error);
   }
+}
+
+function safeEmail(value) {
+  const email = String(value ?? "").trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : "";
+}
+
+function safePhone(value) {
+  const phone = String(value ?? "").trim();
+  const compact = phone.replace(/[\s().-]/g, "");
+  return /^\+?\d{3,15}$/.test(compact) ? { phone, compact } : null;
+}
+
+function setContentText(key, value) {
+  const target = document.querySelector(`[data-site-content="${key}"]`);
+  if (!target) return false;
+  target.textContent = value;
+  return true;
+}
+
+function applySiteContent(values) {
+  let applied = 0;
+
+  for (const [key, value] of Object.entries(values)) {
+    if (key === "contact.email") {
+      const target = document.querySelector('[data-site-content="contact.email"]');
+      const email = safeEmail(value);
+      if (target instanceof HTMLAnchorElement && email) {
+        target.href = `mailto:${email}`;
+        target.textContent = email;
+        applied += 1;
+      } else if (!email) {
+        console.warn("Site Content contact.email is invalid; retaining the static contact address.");
+      }
+      continue;
+    }
+
+    if (key === "contact.phone") {
+      const target = document.querySelector('[data-site-content="contact.phone"]');
+      const phone = safePhone(value);
+      if (target instanceof HTMLAnchorElement && phone) {
+        target.href = `tel:${phone.compact}`;
+        target.textContent = phone.phone;
+        applied += 1;
+      } else if (!phone) {
+        console.warn("Site Content contact.phone is invalid; retaining the static contact number.");
+      }
+      continue;
+    }
+
+    if (setContentText(key, value)) applied += 1;
+  }
+
+  return applied;
+}
+
+async function loadHomeSiteContent() {
+  if (forcedFallback) {
+    console.info("Site Content source paused by ?data=fallback; retaining static Home content.");
+    return;
+  }
+
+  const result = await loadSiteContent({
+    source: DATA_SOURCES.siteContent,
+    fetchText
+  });
+
+  if (result.sourceState === "fallback") {
+    console.warn("Site Content source unavailable; retaining static Home content.", result.error);
+    return;
+  }
+
+  const applied = applySiteContent(result.liveValues);
+  console.info(`Site Content loaded; applied ${applied} field(s).`);
 }
 
 function mediaProvider(source) {
@@ -300,4 +375,4 @@ function setupPanels() {
 }
 
 setupPanels();
-void Promise.allSettled([loadNow(), loadReel()]);
+void Promise.allSettled([loadNow(), loadReel(), loadHomeSiteContent()]);

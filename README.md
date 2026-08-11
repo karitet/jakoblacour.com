@@ -39,9 +39,17 @@ before changing framework, content sources, routes or visual direction.
   (The old `sphere` column still works as a fallback until you switch over.)
 
 Home renders a complete static orientation first, then progressively replaces
-the saved media still and Now items with Google data. If either request fails,
-the saved orientation remains visible. Use `/?data=fallback` for a deterministic
-fallback preview.
+the saved media still, Now items and explicitly mapped Site Content fields with
+Google data. If any request fails, the saved orientation remains visible. Use
+`/?data=fallback` for a deterministic fallback preview of all three sources.
+
+### Site Content (Phase 4)
+
+Short global, Home and Contact copy is read only from the `Content` tab in
+`Jakob la Cour Studio - MyWebsite Content` (`1PO7j9MFvdXzNM3vyK6u4LMRgFUkQ40RsqbqutZVC1PE`).
+The page remains entirely useful with its static values if this source is
+private or unavailable. See [Phase 4 Site Content](docs/ASTRO-PHASE-4-SITE-CONTENT.md)
+for the public schema, publication gate and the fields that are actually wired.
 
 ## Local development
 
@@ -68,7 +76,8 @@ Activities and Library source pages as `dist/legacy/index.html`,
 `dist/legacy/activities.html` and `dist/legacy/library.html`.
 
 See [Phase 1 notes](docs/ASTRO-PHASE-1.md), [Phase 2 notes](docs/ASTRO-PHASE-2-ACTIVITIES.md),
-[Phase 3 notes](docs/ASTRO-PHASE-3-LIBRARY.md) and the complete [source map](docs/SOURCE-MAP.md).
+[Phase 3 notes](docs/ASTRO-PHASE-3-LIBRARY.md), [Phase 4 Site Content](docs/ASTRO-PHASE-4-SITE-CONTENT.md)
+and the complete [source map](docs/SOURCE-MAP.md).
 
 ## To finish
 - **MR hero** (`morphic-realities`) uses a Void still as a stand-in — swap for a real production photo.

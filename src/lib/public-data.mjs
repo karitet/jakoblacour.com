@@ -49,6 +49,7 @@ const LIBRARY_COLUMNS = Object.freeze({
 
 export function normalizeHeader(value) {
   return String(value ?? "")
+    .replace(/^\uFEFF/, "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
