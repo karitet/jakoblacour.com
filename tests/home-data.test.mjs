@@ -75,6 +75,24 @@ test("activity helpers preserve the legacy filters and sort order", () => {
   assert.equal(activityYearKey("2027–"), "2027");
 });
 
+test("activity year sorts place unknown and invalid years after valid years", () => {
+  const activities = [
+    { job: "Unknown year", year: "?" },
+    { job: "Older work", year: "2024" },
+    { job: "Invalid year", year: "TBD" },
+    { job: "Newer work", year: "2026" }
+  ];
+
+  assert.deepEqual(
+    sortActivities(activities, "year-asc").map((item) => item.job),
+    ["Older work", "Newer work", "Unknown year", "Invalid year"]
+  );
+  assert.deepEqual(
+    sortActivities(activities, "year-desc").map((item) => item.job),
+    ["Newer work", "Older work", "Unknown year", "Invalid year"]
+  );
+});
+
 test("unsafe public protocols are rejected", () => {
   assert.equal(safePublicUrl("javascript:alert(1)"), "");
   assert.equal(safePublicUrl("https://example.com"), "https://example.com");

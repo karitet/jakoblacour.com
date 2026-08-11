@@ -213,6 +213,12 @@ export function sortActivities(items, sort = "year-desc") {
   return [...items].sort((a, b) => {
     const aValue = key === "title" ? a.job : activityYearKey(a.year);
     const bValue = key === "title" ? b.job : activityYearKey(b.year);
+
+    if (key === "year" && (!aValue || !bValue)) {
+      if (!aValue && !bValue) return 0;
+      return !aValue ? 1 : -1;
+    }
+
     return multiplier * String(aValue).localeCompare(String(bValue), undefined, {
       sensitivity: "base"
     });
