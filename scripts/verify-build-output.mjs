@@ -45,6 +45,20 @@ if (astroHome.includes("data:image") || astroHome.includes(";base64,")) {
   throw new Error("The Astro Home contains embedded base64 media.");
 }
 
+for (const key of [
+  "site.title",
+  "home.intro",
+  "home.now_label",
+  "contact.title",
+  "contact.summary",
+  "contact.email",
+  "contact.phone"
+]) {
+  if (!astroHome.includes(`data-site-content=\"${key}\"`)) {
+    throw new Error(`The Astro Home is missing the static Site Content fallback for ${key}.`);
+  }
+}
+
 for (const href of [
   "/activities.html",
   "/hybrid-sensation.html",
@@ -64,12 +78,20 @@ if (!astroActivities.includes('data-source-state="loading"')) {
   throw new Error("The Astro Activities route is missing its static live-data shell.");
 }
 
+if (!astroActivities.includes('data-site-content="site.title"')) {
+  throw new Error("The Astro Activities route is missing its static Site Content site-title fallback.");
+}
+
 if (digest(astroLibrary) === digest(legacyLibrary)) {
   throw new Error("The Astro Library route was replaced by the legacy source.");
 }
 
 if (!astroLibrary.includes('data-source-state="loading"')) {
   throw new Error("The Astro Library route is missing its static live-data shell.");
+}
+
+if (!astroLibrary.includes('data-site-content="site.title"')) {
+  throw new Error("The Astro Library route is missing its static Site Content site-title fallback.");
 }
 
 if (!astroLibrary.includes("Saved public record")) {

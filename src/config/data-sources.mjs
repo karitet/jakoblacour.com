@@ -10,6 +10,12 @@ export const DATA_SOURCES = Object.freeze({
   library: {
     name: "Library",
     url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoQTksLhTrPuVf1M8TJ4NGXJs-rCyNwjBwoSXPQWTN6l51SUuN3LXEz2z9xa2ucABhEYHTy9F6pru_/pub?gid=912394319&single=true&output=csv"
+  },
+  siteContent: {
+    name: "Site Content",
+    spreadsheetId: "1PO7j9MFvdXzNM3vyK6u4LMRgFUkQ40RsqbqutZVC1PE",
+    sheet: "Content",
+    url: "https://docs.google.com/spreadsheets/d/1PO7j9MFvdXzNM3vyK6u4LMRgFUkQ40RsqbqutZVC1PE/gviz/tq?tqx=out:csv&sheet=Content"
   }
 });
 

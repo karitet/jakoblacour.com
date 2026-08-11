@@ -91,16 +91,14 @@ Do not create a new CMS, dashboard or editing application.
 
 ## Minimal Site Content model
 
-A dedicated public tab can expose stable page fields:
+Phase 4 uses one dedicated `Content` tab with stable keys and the v0.1 schema:
 
-| key | title | body | link | status |
-| --- | --- | --- | --- | --- |
-| `home.statement` |  | Main public statement |  | publish |
-| `about.intro` | About | Short public introduction |  | publish |
-| `contact.email` | Email | Public email | `mailto:...` | publish |
-| `contact.phone` | Phone | Public phone | `tel:...` | publish |
+`key | area | type | language | value | status | scope | updated_at | source_ref | notes`
 
-The website controls typography and composition. The sheet controls only content.
+Only `status=publish` rows scoped to `website` or `website_and_press` can reach
+the website. English values win over `all`; the website owns typography,
+composition and semantic links. The full public contract and the deliberately
+limited field mapping are recorded in [Phase 4 Site Content](ASTRO-PHASE-4-SITE-CONTENT.md).
 
 ## Incremental implementation
 

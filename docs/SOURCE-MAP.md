@@ -1,6 +1,6 @@
 # MyWebsite surface and source map
 
-Status: Phase 1 inventory
+Status: Phase 4 inventory
 
 Last checked: 2026-08-06
 
@@ -11,14 +11,14 @@ does not authorize publishing from MyContext, MyLog or MyMemory.
 
 | Surface | Public function | Current implementation | Runtime source | Phase 1 treatment |
 | --- | --- | --- | --- | --- |
-| Home | Living field, current orientation and primary navigation | `src/pages/index.astro` | Video sheet plus Activities sheet | Ported to Astro with saved fallback |
+| Home | Living field, current orientation and primary navigation | `src/pages/index.astro` | Video sheet, Activities sheet and mapped Site Content keys | Ported to Astro with saved fallback |
 | Works | Concentrated dossiers | `morphic-realities.html`, `robotic-bloom.html`, `hybrid-sensation.html` | Repository markup and embedded media | Preserved unchanged |
 | Journey / Seeds | Geographic, temporal and relational field | `map.html` | `Arkiv` and `Categories` sheet tabs | Preserved unchanged |
 | Activities | Filterable professional record | `src/pages/activities.astro` | Activities sheet | Astro candidate at `/activities.html`; original route retained at `/legacy/activities.html` as rollback |
 | Library | Publications, press and documents | `src/pages/library.astro` | Library sheet | Astro candidate at `/library.html`; original route retained at `/legacy/library.html` as rollback |
 | Artifacts | Deep media and ritual portals | Separate `karitet/jakob-la-cour-artifacts` repository | Validated artifact manifests and local media | Linked architectural reference; not copied into this site |
-| About | Clear public orientation | No dedicated current route | Not yet defined | Proposed `Site Content` keys only |
-| Contact | Festival, venue and co-production access | Home Contact panel | Repository markup | Preserved on Astro Home |
+| About | Clear public orientation | No dedicated current route | Not yet defined | `about.title` and `about.summary` are intentionally not bound until an existing surface exists |
+| Contact | Festival, venue and co-production access | Home Contact panel | Static markup, progressively enhanced by mapped Site Content keys | Preserved on Astro Home; `contact.location` remains unbound because there is no current location surface |
 
 Home connects visitors to Works, Journey, Activities, Library and Contact. The
 three Works routes remain dossiers. Journey / Seeds connects practices in place
@@ -111,16 +111,35 @@ Source: published Google CSV, `gid=912394319`
 Required public fields are `title` and `status`; only `status=publish` rows are
 shown. The current UI also consumes `type`, `date`, `url` and `outlet`.
 
-## Proposed `Site Content` schema
+## Site Content
 
-No sheet is created or modified in Phase 1. A later public tab can use:
+Source spreadsheet ID: `1PO7j9MFvdXzNM3vyK6u4LMRgFUkQ40RsqbqutZVC1PE`
+Runtime tab: `Content` only
+Runtime endpoint: `https://docs.google.com/spreadsheets/d/1PO7j9MFvdXzNM3vyK6u4LMRgFUkQ40RsqbqutZVC1PE/gviz/tq?tqx=out:csv&sheet=Content`
 
-| key | title | body | link | status |
-| --- | --- | --- | --- | --- |
-| `home.statement` |  | Main public statement |  | `publish` |
-| `about.intro` | About | Short public introduction |  | `publish` |
-| `contact.email` | Email | Public email | `mailto:…` | `publish` |
-| `contact.phone` | Phone | Public phone | `tel:…` | `publish` |
+The runtime never reads `Guide` or `Lists`. The v0.1 tab schema is:
 
-The website owns typography and composition. Only deliberately public rows may
-cross the manual curation boundary.
+| key | area | type | language | value | status | scope | updated_at | source_ref | notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+Published website rows require a stable non-empty key, non-empty value,
+`status=publish`, and `scope=website` or `website_and_press`. English (`en`)
+wins over a neutral `all` value; duplicate active `key` + language rows reject
+the whole live response and keep static copy visible. `source_ref` and `notes`
+are never exposed to the public DOM.
+
+| Site Content key | Existing surface actually bound in Phase 4 |
+| --- | --- |
+| `site.title` | Astro document title on Home, Activities and Library; Activities/Library preserve their route prefix |
+| `home.intro` | Home identity heading |
+| `home.now_label` | Home Now heading only; current items still use Activities |
+| `contact.title` | Home Studio panel heading |
+| `contact.summary` | Home Studio panel’s festival/venue line |
+| `contact.email` | Existing semantic email link (valid bare email required) |
+| `contact.phone` | Existing semantic telephone link (valid bare phone required) |
+| `about.title`, `about.summary`, `contact.location` | Not bound: no existing matching public surface |
+
+The website owns typography, composition and link semantics. Only deliberately
+public rows cross the manual curation boundary. See
+[Phase 4 Site Content](ASTRO-PHASE-4-SITE-CONTENT.md) for editing and access
+instructions.

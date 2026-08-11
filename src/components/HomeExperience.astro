@@ -59,13 +59,13 @@ const works = [
 
   <section class="identity" aria-labelledby="home-title">
     <p class="kick">Ritual · Technology · Performance</p>
-    <h1 id="home-title">Staging of sensation<br />for aesthetic presence.</h1>
+    <h1 id="home-title" data-site-content="home.intro">Staging of sensation<br />for aesthetic presence.</h1>
   </section>
 
   <section class="now-box" aria-labelledby="now-title">
     <div class="now-heading">
       <span class="now-dot" aria-hidden="true"></span>
-      <h2 id="now-title">Now</h2>
+      <h2 id="now-title" data-site-content="home.now_label">Now</h2>
       <span class="source-note" id="now-source-note" role="status" aria-live="polite">Saved orientation</span>
     </div>
     <div id="now-feed" data-source-state="fallback">
@@ -125,7 +125,7 @@ const works = [
 
 <aside class="panel" id="panel-contact" data-panel="contact" aria-labelledby="panel-contact-title" aria-hidden="true">
   <button class="panel-close" type="button" data-close aria-label="Close Contact panel">×</button>
-  <h2 id="panel-contact-title">Studio</h2>
+  <h2 id="panel-contact-title" data-site-content="contact.title">Studio</h2>
   <img
     class="studio-lockup"
     src="/ui/jakob-la-cour-studio-logo.png"
@@ -134,9 +134,9 @@ const works = [
     height="321"
   />
   <p class="contact-line">
-    For festivals, venues & co-production<br />
-    <a href="mailto:info@jakoblacour.com">info@jakoblacour.com</a><br />
-    <a href="tel:+4542599911">+45 425 999 11</a>
+    <span class="contact-summary" data-site-content="contact.summary">For festivals, venues & co-production</span><br />
+    <a data-site-content="contact.email" href="mailto:info@jakoblacour.com">info@jakoblacour.com</a><br />
+    <a data-site-content="contact.phone" href="tel:+4542599911">+45 425 999 11</a>
   </p>
 </aside>
 

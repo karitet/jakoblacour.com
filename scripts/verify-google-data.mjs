@@ -5,6 +5,7 @@ import {
   parseLibraryCsv,
   parseReelCsv
 } from "../src/lib/public-data.mjs";
+import { loadSiteContent } from "../src/lib/site-content.mjs";
 
 async function fetchText(source) {
   const response = await fetch(source.url, {
@@ -16,10 +17,14 @@ async function fetchText(source) {
   return response.text();
 }
 
-const [videoCsv, activitiesCsv, libraryCsv] = await Promise.all([
+const [videoCsv, activitiesCsv, libraryCsv, siteContent] = await Promise.all([
   fetchText(DATA_SOURCES.homeVideo),
   fetchText(DATA_SOURCES.activities),
-  fetchText(DATA_SOURCES.library)
+  fetchText(DATA_SOURCES.library),
+  loadSiteContent({
+    source: DATA_SOURCES.siteContent,
+    fetchText: (url) => fetchText({ ...DATA_SOURCES.siteContent, url })
+  })
 ]);
 
 const reel = parseReelCsv(videoCsv);
@@ -33,3 +38,9 @@ if (library.length === 0) throw new Error("Library: no publishable rows found.")
 console.log(`Home video reel: ${reel.length} publishable row(s).`);
 console.log(`Activities and Now: ${now.length} current row(s) used by Home.`);
 console.log(`Library: ${library.length} publishable row(s).`);
+
+if (siteContent.sourceState === "live") {
+  console.log(`Site Content: ${Object.keys(siteContent.liveValues).length} resolved public key(s).`);
+} else {
+  console.warn(`Site Content: unavailable (non-blocking); static fallback remains in use. ${siteContent.error.message}`);
+}
