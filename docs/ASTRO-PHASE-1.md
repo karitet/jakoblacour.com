@@ -6,6 +6,9 @@ Phase 1 is a technical proof of the approved publication architecture. It ports
 only Home to Astro. No domain, DNS, hosting, WordPress, Google Sheet or Google
 Doc is changed.
 
+Activities was subsequently ported in Phase 2; this document remains the record
+of the Home-only phase.
+
 ## Structure
 
 - `src/pages/index.astro` emits the new static Home.

@@ -1,11 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  activityMatchesFilter,
+  activityYearKey,
   currentActivities,
   parseActivitiesCsv,
   parseCsv,
   parseReelCsv,
   safePublicUrl,
+  sortActivities,
   weightedShuffle
 } from "../src/lib/public-data.mjs";
 
@@ -49,6 +52,27 @@ test("activities parser finds headers below introductory rows", () => {
   assert.equal(current.length, 1);
   assert.equal(current[0].job, "Hyperspectral");
   assert.equal(current[0].selected, true);
+  assert.equal(current[0].category, "Artistical");
+});
+
+test("activity helpers preserve the legacy filters and sort order", () => {
+  const activities = [
+    { job: "Zeta", year: "2024", category: "Educational", selected: false },
+    { job: "Alpha", year: "2027–", category: "Artistical", selected: true },
+    { job: "Beta", year: "2026", category: "Artistical", selected: false }
+  ];
+
+  assert.deepEqual(
+    sortActivities(activities, "year-desc").map((item) => item.job),
+    ["Alpha", "Beta", "Zeta"]
+  );
+  assert.deepEqual(
+    sortActivities(activities, "title-asc").map((item) => item.job),
+    ["Alpha", "Beta", "Zeta"]
+  );
+  assert.equal(activityMatchesFilter(activities[1], "selected"), true);
+  assert.equal(activityMatchesFilter(activities[0], "Artistical"), false);
+  assert.equal(activityYearKey("2027–"), "2027");
 });
 
 test("unsafe public protocols are rejected", () => {

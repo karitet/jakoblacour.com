@@ -173,7 +173,7 @@ export function parseActivitiesCsv(text) {
         year,
         production: pick(row, indexes, "production"),
         url: safePublicUrl(pick(row, indexes, "url")),
-        category: pick(row, indexes, "category"),
+        category: activityCategory(pick(row, indexes, "category")),
         selected: /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "selected")),
         status,
         active
@@ -185,8 +185,38 @@ export function parseActivitiesCsv(text) {
 export function currentActivities(items, limit = 4) {
   return items
     .filter((item) => item.active)
-    .sort((a, b) => String(b.year).localeCompare(String(a.year)))
+    .sort((a, b) => activityYearKey(b.year).localeCompare(activityYearKey(a.year)))
     .slice(0, limit);
+}
+
+export function activityCategory(value) {
+  const category = String(value ?? "").trim();
+  if (/educ/i.test(category)) return "Educational";
+  if (/art/i.test(category)) return "Artistical";
+  return category;
+}
+
+export function activityMatchesFilter(item, filter) {
+  if (!filter || filter === "all") return true;
+  if (filter === "selected") return item.selected;
+  return item.category === filter;
+}
+
+export function activityYearKey(value) {
+  return String(value ?? "").match(/\d{4}/)?.[0] ?? "";
+}
+
+export function sortActivities(items, sort = "year-desc") {
+  const [key, direction] = sort.split("-");
+  const multiplier = direction === "asc" ? 1 : -1;
+
+  return [...items].sort((a, b) => {
+    const aValue = key === "title" ? a.job : activityYearKey(a.year);
+    const bValue = key === "title" ? b.job : activityYearKey(b.year);
+    return multiplier * String(aValue).localeCompare(String(bValue), undefined, {
+      sensitivity: "base"
+    });
+  });
 }
 
 export function safePublicUrl(value) {

@@ -14,7 +14,7 @@ does not authorize publishing from MyContext, MyLog or MyMemory.
 | Home | Living field, current orientation and primary navigation | `src/pages/index.astro` | Video sheet plus Activities sheet | Ported to Astro with saved fallback |
 | Works | Concentrated dossiers | `morphic-realities.html`, `robotic-bloom.html`, `hybrid-sensation.html` | Repository markup and embedded media | Preserved unchanged |
 | Journey / Seeds | Geographic, temporal and relational field | `map.html` | `Arkiv` and `Categories` sheet tabs | Preserved unchanged |
-| Activities | Filterable professional record | `activities.html` | Activities sheet | Preserved unchanged |
+| Activities | Filterable professional record | `src/pages/activities.astro` | Activities sheet | Astro candidate at `/activities.html`; original route retained at `/legacy/activities.html` as rollback |
 | Library | Publications, press and documents | `library.html` | Library sheet | Preserved unchanged |
 | Artifacts | Deep media and ritual portals | Separate `karitet/jakob-la-cour-artifacts` repository | Validated artifact manifests and local media | Linked architectural reference; not copied into this site |
 | About | Clear public orientation | No dedicated current route | Not yet defined | Proposed `Site Content` keys only |
@@ -51,7 +51,7 @@ dependent on this request.
 
 Source: published Google CSV, `gid=0`
 
-Used by: Astro Home and the existing `activities.html`
+Used by: Astro Home and Astro `/activities.html`
 
 | Normalized field | Accepted sheet headers | Use |
 | --- | --- | --- |
@@ -66,6 +66,11 @@ Used by: Astro Home and the existing `activities.html`
 Home shows up to four current or upcoming rows. On mobile, the composition
 intentionally shows the first two. Failure behavior: the saved Hyperspectral and
 Morphic Realities orientation remains visible with a concise source note.
+
+Activities keeps the existing `All`, `Selected`, `Artistical` and `Educational`
+filters, and its year/title sorting. It initially renders the page structure and
+then reads this same public CSV. If the source fails, it keeps the frame and
+reports that the live record is unavailable rather than presenting a blank page.
 
 ## Journey / Seeds
 

@@ -1,9 +1,9 @@
 # jakoblacour.com — MyWebsite
 
-The public site is being consolidated incrementally. Phase 1 adds an Astro-built
-Home while preserving every existing self-contained HTML page and the original
-static Home as a rollback reference. It does not change WordPress, the production
-domain, DNS or hosting.
+The public site is being consolidated incrementally. Phase 1 added an Astro-built
+Home and Phase 2 adds an Astro-built Activities record, while preserving the
+existing self-contained HTML pages and the original static pages as rollback
+references. It does not change WordPress, the production domain, DNS or hosting.
 
 ## Approved direction
 
@@ -18,11 +18,13 @@ before changing framework, content sources, routes or visual direction.
 
 ## Pages
 - **Astro `/`** — fixed single-screen front. Living video reel + "Now" + unfolding panels.
+- **Astro `/activities.html`** — live, filterable Activities record with a static page frame if Google is unavailable.
 - **legacy/index.html** — generated rollback copy of the original static Home.
+- **legacy/activities.html** — generated rollback copy of the original Activities route.
 - **robotic-bloom / morphic-realities / hybrid-sensation** — works (dossier model).
 - **map.html — "Seeds"** — a living field of practice & process, Void-skinned (dark map).
   Quarter-size markers, practice categories, and threads between related points.
-- **activities / library** — the Record, reskinned to Void.
+- **library** — the Record's publications, press and documents surface, preserved as legacy during this phase.
 
 ## Live data (Google Sheets — already wired)
 - **Now (front)** + **activities / library** read your activities sheet (unchanged).
@@ -58,12 +60,13 @@ pnpm build
 pnpm preview
 ```
 
-The static result is written to `dist/`. The build copies the six untouched
-legacy routes to their existing `.html` URLs and saves the original root
-`index.html` as `dist/legacy/index.html`.
+The static result is written to `dist/`. The build copies the five untouched
+legacy routes to their existing `.html` URLs and saves the original Home and
+Activities source pages as `dist/legacy/index.html` and
+`dist/legacy/activities.html`.
 
-See [Phase 1 notes](docs/ASTRO-PHASE-1.md) and the complete
-[source map](docs/SOURCE-MAP.md).
+See [Phase 1 notes](docs/ASTRO-PHASE-1.md), [Phase 2 notes](docs/ASTRO-PHASE-2-ACTIVITIES.md)
+and the complete [source map](docs/SOURCE-MAP.md).
 
 ## To finish
 - **MR hero** (`morphic-realities`) uses a Void still as a stand-in — swap for a real production photo.
