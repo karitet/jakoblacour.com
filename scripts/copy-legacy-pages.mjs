@@ -6,12 +6,11 @@ const dist = resolve(root, "dist");
 const legacy = resolve(dist, "legacy");
 const copiedLegacyPages = [
   "hybrid-sensation.html",
-  "library.html",
   "map.html",
   "morphic-realities.html",
   "robotic-bloom.html"
 ];
-const rollbackPages = ["index.html", "activities.html"];
+const rollbackPages = ["index.html", "activities.html", "library.html"];
 
 await mkdir(legacy, { recursive: true });
 

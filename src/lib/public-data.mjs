@@ -34,6 +34,19 @@ const ACTIVITY_COLUMNS = Object.freeze({
   status: ["status", "state", "aktiv", "active/past"]
 });
 
+const LIBRARY_COLUMNS = Object.freeze({
+  title: ["title", "name", "document", "publication"],
+  type: ["type", "category", "format"],
+  date: ["date", "publish date", "publication date", "year"],
+  url: ["url", "link", "href"],
+  outlet: ["outlet", "publisher", "source", "publication outlet"],
+  language: ["language", "lang"],
+  project: ["project", "work"],
+  quote: ["quote", "excerpt", "description"],
+  externalId: ["external_id", "external id", "id"],
+  status: ["status", "state", "publish"]
+});
+
 export function normalizeHeader(value) {
   return String(value ?? "")
     .toLowerCase()
@@ -182,6 +195,52 @@ export function parseActivitiesCsv(text) {
     .filter(Boolean);
 }
 
+export function libraryDateKey(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  const match = raw.match(/^(\d{4})(?:[-/.](\d{1,2})(?:[-/.](\d{1,2}))?)?$/);
+  if (!match) return "";
+
+  const [, year, month = "01", day = "01"] = match;
+  const monthNumber = Number(month);
+  const dayNumber = Number(day);
+  if (monthNumber < 1 || monthNumber > 12 || dayNumber < 1 || dayNumber > 31) return "";
+
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
+export function parseLibraryCsv(text) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return [];
+
+  const headerRow = findHeaderRow(rows, LIBRARY_COLUMNS);
+  const indexes = indexColumns(rows[headerRow], LIBRARY_COLUMNS);
+
+  return rows
+    .slice(headerRow + 1)
+    .map((row) => {
+      const title = pick(row, indexes, "title");
+      const status = pick(row, indexes, "status").toLowerCase();
+      if (!title || status !== "publish") return null;
+
+      const rawDate = pick(row, indexes, "date");
+      return {
+        title,
+        type: pick(row, indexes, "type"),
+        date: libraryDateKey(rawDate) || rawDate,
+        url: safePublicUrl(pick(row, indexes, "url")),
+        outlet: pick(row, indexes, "outlet"),
+        language: pick(row, indexes, "language"),
+        project: pick(row, indexes, "project"),
+        quote: pick(row, indexes, "quote"),
+        externalId: pick(row, indexes, "externalId"),
+        status
+      };
+    })
+    .filter(Boolean);
+}
+
 export function currentActivities(items, limit = 4) {
   return items
     .filter((item) => item.active)
@@ -222,6 +281,38 @@ export function sortActivities(items, sort = "year-desc") {
     return multiplier * String(aValue).localeCompare(String(bValue), undefined, {
       sensitivity: "base"
     });
+  });
+}
+
+export function libraryTypes(items) {
+  return [...new Set(items.map((item) => item.type).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+}
+
+export function libraryMatchesFilter(item, filter) {
+  return !filter || filter === "all" || item.type === filter;
+}
+
+export function sortLibraryItems(items, sort = "date-desc") {
+  const [key, direction] = sort.split("-");
+  const multiplier = direction === "asc" ? 1 : -1;
+
+  return [...items].sort((a, b) => {
+    if (key === "date") {
+      const aValue = libraryDateKey(a.date);
+      const bValue = libraryDateKey(b.date);
+      if (!aValue || !bValue) {
+        if (!aValue && !bValue) return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+        return !aValue ? 1 : -1;
+      }
+      const compared = multiplier * aValue.localeCompare(bValue);
+      return compared || a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+    }
+
+    const aValue = key === "title" ? a.title : a.type;
+    const bValue = key === "title" ? b.title : b.type;
+    const compared = multiplier * aValue.localeCompare(bValue, undefined, { sensitivity: "base" });
+    return compared || a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
   });
 }
 

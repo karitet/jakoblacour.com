@@ -6,6 +6,10 @@ export const DATA_SOURCES = Object.freeze({
   activities: {
     name: "Activities and Now",
     url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdydtmZ-e-n8yk_YlVt4AOnd7eByn6MFs1jFndqsMLVTVdArvbOsQltfniD6VwHOQNLQ2yqujAO3rO/pub?gid=0&single=true&output=csv"
+  },
+  library: {
+    name: "Library",
+    url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoQTksLhTrPuVf1M8TJ4NGXJs-rCyNwjBwoSXPQWTN6l51SUuN3LXEz2z9xa2ucABhEYHTy9F6pru_/pub?gid=912394319&single=true&output=csv"
   }
 });
 

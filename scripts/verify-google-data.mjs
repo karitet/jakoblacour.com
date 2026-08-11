@@ -1,5 +1,10 @@
 import { DATA_SOURCES, FETCH_TIMEOUT_MS } from "../src/config/data-sources.mjs";
-import { currentActivities, parseActivitiesCsv, parseReelCsv } from "../src/lib/public-data.mjs";
+import {
+  currentActivities,
+  parseActivitiesCsv,
+  parseLibraryCsv,
+  parseReelCsv
+} from "../src/lib/public-data.mjs";
 
 async function fetchText(source) {
   const response = await fetch(source.url, {
@@ -11,16 +16,20 @@ async function fetchText(source) {
   return response.text();
 }
 
-const [videoCsv, activitiesCsv] = await Promise.all([
+const [videoCsv, activitiesCsv, libraryCsv] = await Promise.all([
   fetchText(DATA_SOURCES.homeVideo),
-  fetchText(DATA_SOURCES.activities)
+  fetchText(DATA_SOURCES.activities),
+  fetchText(DATA_SOURCES.library)
 ]);
 
 const reel = parseReelCsv(videoCsv);
 const now = currentActivities(parseActivitiesCsv(activitiesCsv));
+const library = parseLibraryCsv(libraryCsv);
 
 if (reel.length === 0) throw new Error("Home video reel: no publishable rows found.");
 if (now.length === 0) throw new Error("Activities and Now: no current rows found.");
+if (library.length === 0) throw new Error("Library: no publishable rows found.");
 
 console.log(`Home video reel: ${reel.length} publishable row(s).`);
 console.log(`Activities and Now: ${now.length} current row(s) used by Home.`);
+console.log(`Library: ${library.length} publishable row(s).`);

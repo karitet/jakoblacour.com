@@ -1,13 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { LIBRARY_FALLBACK_ITEMS } from "../src/data/library-fallback.mjs";
 import {
   activityMatchesFilter,
   activityYearKey,
   currentActivities,
+  libraryMatchesFilter,
+  libraryTypes,
   parseActivitiesCsv,
   parseCsv,
+  parseLibraryCsv,
   parseReelCsv,
   safePublicUrl,
+  sortLibraryItems,
   sortActivities,
   weightedShuffle
 } from "../src/lib/public-data.mjs";
@@ -90,6 +95,65 @@ test("activity year sorts place unknown and invalid years after valid years", ()
   assert.deepEqual(
     sortActivities(activities, "year-desc").map((item) => item.job),
     ["Newer work", "Older work", "Unknown year", "Invalid year"]
+  );
+});
+
+test("library parser preserves the published schema, link safety and publication gate", () => {
+  const csv = [
+    "Library record",
+    "Title,Type,Date,URL,Outlet,Language,Status,Project,Quote,External ID",
+    "A quoted document,Press mention,2025.8.3,https://example.com/article,Example Press,EN,publish,Hybrid Sensation,Visible quote,ref-1",
+    "Unpublished document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,planned,,,"
+  ].join("\n");
+
+  assert.deepEqual(parseLibraryCsv(csv), [{
+    title: "A quoted document",
+    type: "Press mention",
+    date: "2025-08-03",
+    url: "https://example.com/article",
+    outlet: "Example Press",
+    language: "EN",
+    project: "Hybrid Sensation",
+    quote: "Visible quote",
+    externalId: "ref-1",
+    status: "publish"
+  }]);
+});
+
+test("saved Library fallback remains a publishable, useful record", () => {
+  assert.equal(LIBRARY_FALLBACK_ITEMS.length, 13);
+  assert.equal(LIBRARY_FALLBACK_ITEMS.every((item) => item.title && item.type && item.date), true);
+  assert.equal(
+    LIBRARY_FALLBACK_ITEMS.every((item) => !item.url || safePublicUrl(item.url) === item.url),
+    true
+  );
+});
+
+test("library helpers preserve filters and deterministic date, type and title sorting", () => {
+  const items = [
+    { title: "Zulu", type: "Newsletter", date: "?" },
+    { title: "Alpha", type: "Press mention", date: "2025-08-30" },
+    { title: "Beta", type: "Counselling", date: "2024-01-01" }
+  ];
+
+  assert.deepEqual(libraryTypes(items), ["Counselling", "Newsletter", "Press mention"]);
+  assert.equal(libraryMatchesFilter(items[0], "Newsletter"), true);
+  assert.equal(libraryMatchesFilter(items[0], "all"), true);
+  assert.deepEqual(
+    sortLibraryItems(items, "date-desc").map((item) => item.title),
+    ["Alpha", "Beta", "Zulu"]
+  );
+  assert.deepEqual(
+    sortLibraryItems(items, "date-asc").map((item) => item.title),
+    ["Beta", "Alpha", "Zulu"]
+  );
+  assert.deepEqual(
+    sortLibraryItems(items, "type-asc").map((item) => item.title),
+    ["Beta", "Zulu", "Alpha"]
+  );
+  assert.deepEqual(
+    sortLibraryItems(items, "title-asc").map((item) => item.title),
+    ["Alpha", "Beta", "Zulu"]
   );
 });
 
