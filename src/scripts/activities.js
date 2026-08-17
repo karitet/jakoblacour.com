@@ -33,7 +33,7 @@ async function fetchText(url) {
 function createCell(text, className) {
   const cell = document.createElement("span");
   cell.className = className;
-  cell.textContent = text || "—";
+  cell.textContent = text || "-";
   return cell;
 }
 

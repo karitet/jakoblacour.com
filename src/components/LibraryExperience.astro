@@ -21,7 +21,7 @@ const sorts = [
     <h1>Library</h1>
     <p class="library-intro">A selected archive of press, talks and project material.</p>
     <p class="library-source" id="library-source" role="status" aria-live="polite">
-      Saved public record — loading live data
+      Saved public record - loading live data
     </p>
   </header>
 
@@ -69,10 +69,10 @@ const sorts = [
         {items.map((item) => (
           <article class="library-row" data-library-row role="row">
             <div class="library-type" role="cell">
-              <span>{item.type || "—"}</span>
+              <span>{item.type || "-"}</span>
               {item.language && <small>{item.language}</small>}
             </div>
-            <time class="library-date" datetime={item.date || undefined} role="cell">{item.date || "—"}</time>
+            <time class="library-date" datetime={item.date || undefined} role="cell">{item.date || "-"}</time>
             <div class="library-title" role="cell">
               {item.url ? (
                 <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
@@ -80,7 +80,7 @@ const sorts = [
               {item.quote && <p>{item.quote}</p>}
             </div>
             <div class="library-outlet" role="cell">
-              <span>{item.outlet || "—"}</span>
+              <span>{item.outlet || "-"}</span>
               {item.project && <small>{item.project}</small>}
             </div>
           </article>

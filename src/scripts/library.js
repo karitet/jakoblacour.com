@@ -36,7 +36,7 @@ function createTextCell(text, className) {
   const cell = document.createElement("div");
   cell.className = className;
   cell.setAttribute("role", "cell");
-  cell.textContent = text || "—";
+  cell.textContent = text || "-";
   return cell;
 }
 
@@ -56,7 +56,7 @@ function createRow(item) {
   const date = document.createElement("time");
   date.className = "library-date";
   date.setAttribute("role", "cell");
-  date.textContent = item.date || "—";
+  date.textContent = item.date || "-";
   if (/^\d{4}-\d{2}-\d{2}$/.test(item.date)) date.dateTime = item.date;
 
   const title = document.createElement("div");
@@ -166,7 +166,7 @@ function setSourceState(sourceState, message) {
 
 async function loadLibrary() {
   if (forcedFallback) {
-    setSourceState("fallback", "Saved public record — live source paused");
+    setSourceState("fallback", "Saved public record - live source paused");
     return;
   }
 
@@ -179,7 +179,7 @@ async function loadLibrary() {
       ? "Live public record"
       : "Live record contains no published entries");
   } catch (error) {
-    setSourceState("fallback", "Saved public record — live source unavailable");
+    setSourceState("fallback", "Saved public record - live source unavailable");
     console.warn("Library source unavailable; retaining the saved public record.", error);
   }
 }

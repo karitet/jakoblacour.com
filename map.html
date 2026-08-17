@@ -189,8 +189,8 @@ const csvUrl=tab=>`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tq
 // Edit this text to change the Info box:
 const INFO_HTML=`
   <h2>Seeds</h2>
-  <p>A living field of the practice — the works, and the work around them: 1:1 sessions, streams, workshops, talks, masterclasses and field recordings, gathered across place and time.</p>
-  <p>Each mark is a seed. Threads draw together what belongs to the same work or path. Move the handle along the timeline to follow the process — the past is revealed, what is to come appears as a trace.</p>
+  <p>A living field of the practice - the works, and the work around them: 1:1 sessions, streams, workshops, talks, masterclasses and field recordings, gathered across place and time.</p>
+  <p>Each mark is a seed. Threads draw together what belongs to the same work or path. Move the handle along the timeline to follow the process - the past is revealed, what is to come appears as a trace.</p>
 `;
 
 const DEFAULT_CATS=[
@@ -209,7 +209,7 @@ const ALIAS={lecture:"talk",lectures:"talk",talks:"talk",masterclasses:"mastercl
 const SAMPLE=[
  {type:"Performance",category:"work",name:"Morphic Realities",location:"Ceremony",lat:55.676,lng:12.568,
   date_start:"2026-09-01",date_added:"2026-06-01",description:"The ceremony, in performance.",link:"morphic-realities.html",thread:"morphic",visible:"TRUE"},
- {type:"Field recording",category:"field",name:"Geophony — solstice",location:"Nordsjælland",lat:56.04,lng:12.55,
+ {type:"Field recording",category:"field",name:"Geophony - solstice",location:"Nordsjælland",lat:56.04,lng:12.55,
   date_start:"2026-06-21",date_added:"2026-06-10",description:"A field recording for the practice.",thread:"morphic",visible:"TRUE"},
  {type:"1:1 Session",category:"session",name:"Sensation session",location:"Studio",lat:55.690,lng:12.555,
   date_start:"2026-07-10",date_added:"2026-06-15",description:"A one-to-one session.",link:"#",visible:"TRUE"},
@@ -330,8 +330,8 @@ async function load(){
   try{CATS=(await fetchCSV(csvUrl("Categories"))).filter(c=>c.key)}catch(e){CATS=[]}
   if(!CATS.length)CATS=DEFAULT_CATS;
   indexCats();active=new Set(CATS.map(c=>norm(c.key)));
-  try{const d=await fetchCSV(csvUrl("Arkiv"));DATA=d.length?d:SAMPLE;if(!d.length)notice("Couldn't load the sheet — showing sample data.")}
-  catch(e){DATA=SAMPLE;notice("Couldn't load the sheet — showing sample data.")}
+  try{const d=await fetchCSV(csvUrl("Arkiv"));DATA=d.length?d:SAMPLE;if(!d.length)notice("Couldn't load the sheet - showing sample data.")}
+  catch(e){DATA=SAMPLE;notice("Couldn't load the sheet - showing sample data.")}
   DATA=DATA.filter(x=>norm(x.visible||x.visibel||"true")!=="false");
   DATA.forEach(d=>{d.sphere=d.category||d.sphere||"";});
   buildLegend();renderMarkers();buildTimeline()}
@@ -383,10 +383,10 @@ function openCard(d,state){const c=resolveCat(d.sphere);
         <button class="c-close" aria-label="Close" onclick="closeCard()">×</button></div>
       <h2 class="c-name">${d.name||""}</h2>
       <div class="c-img">${(c&&c.glyph)||'◆'}</div>
-      <div class="c-field"><div class="c-label">Expected</div><div class="c-val">${when?fmtDate(when):(d.date_start||"—")}</div></div>
+      <div class="c-field"><div class="c-label">Expected</div><div class="c-val">${when?fmtDate(when):(d.date_start||"-")}</div></div>
       ${booking}`;
     document.getElementById('card').classList.add('show');return}
-  const period=d.date_start?(d.date_end?`${d.date_start} – ${d.date_end}`:d.date_start):"—";
+  const period=d.date_start?(d.date_end?`${d.date_start} – ${d.date_end}`:d.date_start):"-";
   const vid=embedUrl(d.video_url);
   const media=vid?`<div class="c-video"><iframe src="${vid}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`
     :d.image_url?`<div class="c-img" style="background-image:url('${d.image_url}')"></div>`
@@ -396,9 +396,9 @@ function openCard(d,state){const c=resolveCat(d.sphere);
     <div class="card-top"><span class="c-kind">${d.type?d.type+" · ":""}${(c&&c.label)||d.sphere||""}</span>
       <button class="c-close" aria-label="Close" onclick="closeCard()">×</button></div>
     <h2 class="c-name">${d.name||""}</h2>${media}
-    <div class="c-field"><div class="c-label">Location</div><div class="c-val">${d.location||"—"}</div></div>
+    <div class="c-field"><div class="c-label">Location</div><div class="c-val">${d.location||"-"}</div></div>
     <div class="c-field"><div class="c-label">Active period</div><div class="c-val">${period}</div></div>
-    <div class="c-field"><div class="c-label">Added</div><div class="c-val">${d.date_added||"—"}</div></div>
+    <div class="c-field"><div class="c-label">Added</div><div class="c-val">${d.date_added||"-"}</div></div>
     <p class="c-desc">${d.description||""}</p>${more}`;
   document.getElementById('card').classList.add('show')}
 function closeCard(){document.getElementById('card').classList.remove('show');
