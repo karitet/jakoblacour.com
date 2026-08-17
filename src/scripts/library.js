@@ -17,9 +17,11 @@ const state = {
 async function fetchText(url) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const requestUrl = new URL(url);
+  requestUrl.searchParams.set("_", String(Date.now()));
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(requestUrl, {
       cache: "no-store",
       signal: controller.signal
     });

@@ -199,7 +199,9 @@ function applyFilterSort(){
   const msg=document.getElementById('msg');
   try{
     msg.textContent='Loading…';
-    const res = await fetch(toCSV(SHEET_URL), {cache:'no-store'});
+    const feedUrl = new URL(toCSV(SHEET_URL));
+    feedUrl.searchParams.set('_', String(Date.now()));
+    const res = await fetch(feedUrl, {cache:'no-store'});
     if(!res.ok) throw new Error('HTTP '+res.status);
     const rows = parseCSV(await res.text());
     let h = findHeaderRow(rows); if (h<0) h=0;
