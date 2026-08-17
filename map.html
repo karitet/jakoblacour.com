@@ -386,7 +386,7 @@ function openCard(d,state){const c=resolveCat(d.sphere);
       <div class="c-field"><div class="c-label">Expected</div><div class="c-val">${when?fmtDate(when):(d.date_start||"-")}</div></div>
       ${booking}`;
     document.getElementById('card').classList.add('show');return}
-  const period=d.date_start?(d.date_end?`${d.date_start} – ${d.date_end}`:d.date_start):"-";
+  const period=d.date_start?(d.date_end?`${d.date_start} - ${d.date_end}`:d.date_start):"-";
   const vid=embedUrl(d.video_url);
   const media=vid?`<div class="c-video"><iframe src="${vid}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`
     :d.image_url?`<div class="c-img" style="background-image:url('${d.image_url}')"></div>`
