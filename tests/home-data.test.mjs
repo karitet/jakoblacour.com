@@ -117,6 +117,7 @@ test("library parser preserves the published schema, link safety and publication
     "Library record",
     "Title,Type,Date,URL,Outlet,Language,Status,Project,Quote,External ID,Selected,Codex valg",
     "A quoted document,Press mention,2025.8.3,https://example.com/article,Example Press,EN,publish,Hybrid Sensation,Visible quote,ref-1,true,true",
+    "A localised date,Press mention,04/09/2018,https://example.com/localised,Example Press,DK,publish,,,,true,false",
     "Unselected document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,publish,,,,false,false",
     "Unpublished document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,planned,,,,true,false"
   ].join("\n");
@@ -131,6 +132,17 @@ test("library parser preserves the published schema, link safety and publication
     project: "Hybrid Sensation",
     quote: "Visible quote",
     externalId: "ref-1",
+    status: "publish"
+  }, {
+    title: "A localised date",
+    type: "Press mention",
+    date: "2018-09-04",
+    url: "https://example.com/localised",
+    outlet: "Example Press",
+    language: "DK",
+    project: "",
+    quote: "",
+    externalId: "",
     status: "publish"
   }]);
 });
@@ -148,7 +160,7 @@ test("library helpers preserve filters and deterministic date, type and title so
   const items = [
     { title: "Zulu", type: "Newsletter", date: "?" },
     { title: "Alpha", type: "Press mention", date: "2025-08-30" },
-    { title: "Beta", type: "Counselling", date: "2024-01-01" }
+    { title: "Beta", type: "Counselling", date: "01/01/2024" }
   ];
 
   assert.deepEqual(libraryTypes(items), ["Counselling", "Newsletter", "Press mention"]);

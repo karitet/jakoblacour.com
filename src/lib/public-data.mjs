@@ -201,13 +201,22 @@ export function libraryDateKey(value) {
   const raw = String(value ?? "").trim();
   if (!raw) return "";
 
-  const match = raw.match(/^(\d{4})(?:[-/.](\d{1,2})(?:[-/.](\d{1,2}))?)?$/);
-  if (!match) return "";
+  const yearFirst = raw.match(/^(\d{4})(?:[-/.](\d{1,2})(?:[-/.](\d{1,2}))?)?$/);
+  const dayFirst = raw.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+  if (!yearFirst && !dayFirst) return "";
 
-  const [, year, month = "01", day = "01"] = match;
+  const [, year, month = "01", day = "01"] = yearFirst
+    ?? [null, dayFirst[3], dayFirst[2], dayFirst[1]];
   const monthNumber = Number(month);
   const dayNumber = Number(day);
   if (monthNumber < 1 || monthNumber > 12 || dayNumber < 1 || dayNumber > 31) return "";
+
+  const normalized = new Date(Date.UTC(Number(year), monthNumber - 1, dayNumber));
+  if (
+    normalized.getUTCFullYear() !== Number(year)
+    || normalized.getUTCMonth() !== monthNumber - 1
+    || normalized.getUTCDate() !== dayNumber
+  ) return "";
 
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
