@@ -183,13 +183,14 @@
       const obj = {};
       headers.forEach((h, i)=> obj[h] = r[i] ?? '');
       obj.status = String(obj.status || '').toLowerCase();
+      obj.selected = /^(y(es)?|ja|true|1)$/i.test(String(obj.selected || '').trim());
       if (obj.date) obj.date = toISODate(obj.date);
       if (obj.url) obj.url = String(obj.url).trim();
       obj.title = String(obj.title || '').trim();
       obj.type = String(obj.type || '').trim();
       obj.outlet = String(obj.outlet || '').trim();
       return obj;
-    }).filter(o => o.status === 'publish' && o.title);
+    }).filter(o => o.status === 'publish' && o.selected && o.title);
 
     if (!items.length){
       msg.textContent = 'No published items found.';

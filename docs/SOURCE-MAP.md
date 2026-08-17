@@ -108,8 +108,10 @@ Google is unavailable.
 
 Source: published Google CSV, `gid=912394319`
 
-Required public fields are `title` and `status`; only `status=publish` rows are
-shown. The current UI also consumes `type`, `date`, `url` and `outlet`.
+Required public fields are `title`, `status` and `selected`; only rows where
+`status=publish` and `selected` is checked are shown. The current UI also
+consumes `type`, `date`, `url` and `outlet`. `Codex valg` is editorial guidance
+in the sheet only and never changes the public Library.
 
 ## Site Content
 
