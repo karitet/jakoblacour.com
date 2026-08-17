@@ -96,16 +96,24 @@
   }
 
   function toISODate(v){
-    if(!v) return '';
-    const s = String(v).trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-    const s2 = s.replace(/\./g,'-');
-    const parts = s2.split('-').map(p=>p.padStart(2,'0'));
-    if (parts.length === 3){
-      if (parts[0].length === 4) return `${parts[0]}-${parts[1]}-${parts[2]}`;
-      return `20${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-    return s;
+    const raw = String(v || '').trim();
+    if (!raw) return '';
+
+    const yearFirst = raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    const dayFirst = raw.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+    if (!yearFirst && !dayFirst) return '';
+
+    const [, year, month, day] = yearFirst
+      ? yearFirst
+      : [null, dayFirst[3], dayFirst[2], dayFirst[1]];
+    const normalized = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    if (
+      normalized.getUTCFullYear() !== Number(year)
+      || normalized.getUTCMonth() !== Number(month) - 1
+      || normalized.getUTCDate() !== Number(day)
+    ) return '';
+
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
 
   function renderRows(items){
@@ -116,11 +124,11 @@
       art.className = 'lib-row';
       art.setAttribute('role','row');
       art.dataset.type = it.type || '';
-      art.dataset.date = it.date || '';
+      art.dataset.date = it.dateSort || '';
       art.dataset.title = it.title || '';
       art.innerHTML = `
         <div class="lib-col col-type">${it.type || ''}</div>
-        <time class="lib-col col-date" datetime="${it.date || ''}">${it.date || ''}</time>
+        <time class="lib-col col-date" datetime="${it.dateSort || ''}">${it.date || ''}</time>
         <div class="lib-col col-title">
           ${it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${it.title || ''}</a>` : (it.title || '')}
         </div>
@@ -184,7 +192,8 @@
       headers.forEach((h, i)=> obj[h] = r[i] ?? '');
       obj.status = String(obj.status || '').toLowerCase();
       obj.selected = /^(y(es)?|ja|true|1)$/i.test(String(obj.selected || '').trim());
-      if (obj.date) obj.date = toISODate(obj.date);
+      obj.date = String(obj.date || '').trim();
+      obj.dateSort = toISODate(obj.date);
       if (obj.url) obj.url = String(obj.url).trim();
       obj.title = String(obj.title || '').trim();
       obj.type = String(obj.type || '').trim();
@@ -197,7 +206,7 @@
       return;
     }
 
-    items.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+    items.sort((a,b)=> (b.dateSort||'').localeCompare(a.dateSort||''));
 
     buildTypeChips(items);
     renderRows(items);
