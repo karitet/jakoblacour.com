@@ -97,7 +97,7 @@ nav.top button:hover{color:var(--ice)}
   <div class="nowbox">
     <div class="now-head"><span class="now-dot"></span><span class="now-title">Now</span></div>
     <div id="nowFeed">
-      <div class="now-item"><span class="when">Jun 2026</span><span class="what"><b>Hybrid Sensation</b> &mdash; on tour</span></div>
+      <div class="now-item"><span class="when">Now</span><span class="what">Loading current activities…</span></div>
       <div class="now-item"><span class="when">2026</span><span class="what"><b>Morphic Realities</b> &mdash; in performance</span></div>
     </div>
   </div>
@@ -158,20 +158,21 @@ nav.top button:hover{color:var(--ice)}
 })();
 </script><script>
 (function(){
-  var SHEET='https://docs.google.com/spreadsheets/d/e/2PACX-1vSdydtmZ-e-n8yk_YlVt4AOnd7eByn6MFs1jFndqsMLVTVdArvbOsQltfniD6VwHOQNLQ2yqujAO3rO/pubhtml?gid=0&single=true';
+  var SHEET='https://docs.google.com/spreadsheets/d/1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY/pub?gid=0&single=true&output=csv';
   function toCSV(u){try{var x=new URL(u);if(x.pathname.indexOf('/pubhtml')>=0){var gid=(x.search.match(/gid=(\d+)/)||[])[1]||'0';return x.origin+x.pathname.replace('/pubhtml','/pub')+'?gid='+gid+'&single=true&output=csv';}return u.indexOf('output=csv')>=0?u:u+(u.indexOf('?')>=0?'&':'?')+'output=csv';}catch(e){return u;}}
   function parseCSV(t){var R=[],c='',q=false,row=[];for(var i=0;i<t.length;i++){var ch=t[i],n=t[i+1];if(ch=='"'&&q&&n=='"'){c+='"';i++;continue;}if(ch=='"'){q=!q;continue;}if(ch==','&&!q){row.push(c);c='';continue;}if((ch=='\n'||ch=='\r')&&!q){if(c.length||row.length){row.push(c);R.push(row);row=[];c='';}continue;}c+=ch;}if(c.length||row.length){row.push(c);R.push(row);}return R.filter(function(r){return r.length&&r.some(function(v){return String(v).trim()!='';});});}
   var norm=function(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();};
-  var COL={job:['job title','job titel','title','titel','work','vaerk'],year:['year','aar','date','dato'],prod:['production company','company','producer','producent','produktion'],url:['url','link','href'],cat:['category','kategori','type'],stat:['status','state','active/past']};
+  var COL={job:['job title','job titel','title','titel','work','vaerk'],year:['year','aar','date','dato'],prod:['production company','company','producer','producent','produktion'],url:['url','link','href'],cat:['category','kategori','artistical/educational','artistic/educational','type'],featured:['featured','selected','udvalgt','yes/no','selected?','is selected'],stat:['status','state','active/past']};
   function hidx(h){var H=h.map(norm),idx={};for(var k in COL){idx[k]=-1;for(var j=0;j<COL[k].length;j++){var p=H.indexOf(COL[k][j]);if(p!=-1){idx[k]=p;break;}}}return idx;}
   function pick(r,idx,k){return idx[k]>=0?String(r[idx[k]]||'').trim():'';}
   function active(st,yr){var s=String(st||'').toLowerCase();if(/(active|current|ongoing|present|now|aktuel|upcoming|kommende)/.test(s))return true;if(/^\s*\d{4}\s*[\u2013-]\s*$/.test(String(yr||'')))return true;return false;}
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
-  fetch(toCSV(SHEET),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
+  var feedUrl=new URL(toCSV(SHEET));feedUrl.searchParams.set('_',String(Date.now()));
+  fetch(feedUrl,{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
     var rows=parseCSV(t);var al=[];for(var k in COL)al=al.concat(COL[k]);var hi=0;
     for(var i=0;i<rows.length;i++){if(rows[i].map(norm).some(function(x){return al.indexOf(x)>=0;})){hi=i;break;}}
     var idx=hidx(rows[hi]);var data=[];
-    for(var i=hi+1;i<rows.length;i++){var job=pick(rows[i],idx,'job');if(!job)continue;var yr=pick(rows[i],idx,'year');if(!active(pick(rows[i],idx,'stat'),yr))continue;data.push({job:job,year:yr,prod:pick(rows[i],idx,'prod'),url:pick(rows[i],idx,'url'),cat:pick(rows[i],idx,'cat')});}
+    for(var i=hi+1;i<rows.length;i++){var job=pick(rows[i],idx,'job');if(!job)continue;var featured=/^(?:y(?:es)?|ja|true|1)$/i.test(pick(rows[i],idx,'featured'));if(!featured)continue;var yr=pick(rows[i],idx,'year');if(!active(pick(rows[i],idx,'stat'),yr))continue;data.push({job:job,year:yr,prod:pick(rows[i],idx,'prod'),url:pick(rows[i],idx,'url'),cat:pick(rows[i],idx,'cat')});}
     data.sort(function(a,b){return String(b.year).localeCompare(String(a.year));});
     if(!data.length)return;var feed=document.getElementById('nowFeed');feed.innerHTML='';
     data.slice(0,4).forEach(function(it){var what=it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener"><b>'+esc(it.job)+'</b></a>':'<b>'+esc(it.job)+'</b>';var el=document.createElement('div');el.className='now-item';el.innerHTML='<span class="when">'+esc(it.year||'Now')+'</span><span class="what">'+what+'</span>';feed.appendChild(el);});

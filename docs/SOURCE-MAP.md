@@ -27,8 +27,8 @@ permanent portals rather than a generic website section.
 
 ## Home video reel
 
-Source: Featured Activities in the Record sheet,
-`1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY`, `gid=0`
+Source: published Home video reel CSV,
+`2PACX-1vRb34PC7r4RT8ax4ttt-7ANq21TtWNF2PFjpaQzMmR6Ooi1OB8XUXUiA-a0DYTjSlcIF3cQlNH9jKxZ`, `gid=0`
 
 Configured in: `src/config/data-sources.mjs`
 
@@ -50,9 +50,10 @@ dependent on this request.
 
 ## Activities and Home Now
 
-Source: published Google CSV, `gid=0`
+Source: Featured Activities in the Record sheet,
+`1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY`, `gid=0`
 
-Used by: Astro Home and Astro `/activities.html`
+Used by: Astro Home, the public Home fallback and Astro `/activities.html`
 
 | Normalized field | Accepted sheet headers | Use |
 | --- | --- | --- |
@@ -65,8 +66,9 @@ Used by: Astro Home and Astro `/activities.html`
 | `status` | `status`, `state`, `aktiv`, `active/past` | Current/upcoming recognition |
 
 Home shows up to four current or upcoming rows. On mobile, the composition
-intentionally shows the first two. Failure behavior: the saved Hyperspectral and
-Morphic Realities orientation remains visible with a concise source note.
+intentionally shows the first two. The public fallback keeps a neutral loading
+state until the Featured feed responds, so it does not surface an unfeatured
+activity.
 
 Activities keeps the `All`, `Artistic` and `Educational`
 filters, and its year/title sorting. It initially renders the page structure and

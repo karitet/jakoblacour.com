@@ -29,7 +29,8 @@ before changing framework, content sources, routes or visual direction.
 - **Library** — the Record's publications, press and documents surface with its existing Library sheet.
 
 ## Live data (Google Sheets — already wired)
-- **Now (front)** + **activities / library** read your activities sheet (unchanged).
+- **Now (front)** and **Activities** read **Featured Activities** from the Record sheet.
+- **Library** reads **Featured Library** from the same Record sheet. Its feed requires both `status = publish` and `Featured = TRUE`.
 - **Video reel (front)** reads your prox video sheet (title, src, poster, link, start, end, weight, status, aspect).
 - **Seeds (map)** reads the same map sheet. Two columns now drive it:
   - **category** — work · session · stream · workshop · talk · masterclass · field · seed
