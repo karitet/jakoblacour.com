@@ -38,9 +38,8 @@
   <div class="tools">
     <span class="label">Show</span>
     <div id="show-group" class="chipset">
-  <button class="chip" data-show="">All</button>
-  <button class="chip is-active" data-show="Selected">Selected</button>
-  <button class="chip" data-show="Artistical">Artistical</button>
+  <button class="chip is-active" data-show="">All</button>
+  <button class="chip" data-show="Artistic">Artistic</button>
   <button class="chip" data-show="Educational">Educational</button>
 </div>
 
@@ -86,7 +85,7 @@
 
 <script>
 /* ===== Your Sheet ===== */
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSdydtmZ-e-n8yk_YlVt4AOnd7eByn6MFs1jFndqsMLVTVdArvbOsQltfniD6VwHOQNLQ2yqujAO3rO/pubhtml?gid=0&single=true';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY/pub?gid=0&single=true&output=csv';
 /* ====================== */
 
 function toCSV(url){
@@ -125,7 +124,7 @@ const COL = {
   prod: ['production company','company','producer','producent','produktion','produktionsselskab','produktion selskab'],
   url:  ['url','link','href'],
   cat:  ['category','kategori','artistical/educational','artistic/educational','type'],
-  sel:  ['selected','udvalgt','yes/no','selected?','is selected'],
+  featured: ['featured','selected','udvalgt','yes/no','selected?','is selected'],
   stat: ['status','state','aktiv','active/past']
 };
 function findHeaderRow(rows){
@@ -142,10 +141,10 @@ function headerIndex(headers){
 }
 function pick(row, idx, key){ return idx[key] >= 0 ? String(row[idx[key]]||'').trim() : ''; }
 function yearKey(v){ const m = String(v||'').match(/\d{4}/); return m ? m[0] : ''; }
-function isYes(v){ return /^y(es)?|ja|true|1$/i.test(String(v).trim()); }
+function isYes(v){ return /^(?:y(?:es)?|ja|true|1)$/i.test(String(v).trim()); }
 function isActive(status, year){
   const s = String(status||'').toLowerCase();
-  if (/(active|current|ongoing|present|now|aktuel)/.test(s)) return true;
+  if (/(active|current|ongoing|present|now|aktuel|upcoming|kommende)/.test(s)) return true;
   if (/^\s*\d{4}\s*[–-]\s*$/.test(String(year||''))) return true;
   return false;
 }
@@ -154,7 +153,6 @@ function buildRow(item){
   const el=document.createElement('div');
   el.className='row';
   el.dataset.cat=item.cat || '';
-  el.dataset.sel=item.selected ? '1' : '0';
   el.dataset.year=yearKey(item.year);
   el.dataset.title=(item.job||'');
   el.innerHTML = `
@@ -176,11 +174,7 @@ function applyFilterSort(){
     const rows=[...container.querySelectorAll('.row:not(.head)')];
     rows.forEach(r=>{
       const cat=r.dataset.cat||'';
-      const sel=r.dataset.sel==='1';
-      const match =
-        !showActive ||
-        (showActive==='Selected' && sel) ||
-        (showActive!=='Selected' && cat===showActive);
+      const match = !showActive || cat===showActive;
       r.style.display = match ? '' : 'none';
     });
 
@@ -213,12 +207,13 @@ function applyFilterSort(){
       if (!job) return null;
       const year = pick(r,idx,'year');
       const catRaw = pick(r,idx,'cat');
-      const cat = /educ/i.test(catRaw) ? 'Educational' : (/art/i.test(catRaw) ? 'Artistical' : (catRaw || ''));
-      const selected = isYes(pick(r,idx,'sel'));
+      const cat = /educ/i.test(catRaw) ? 'Educational' : (/art/i.test(catRaw) ? 'Artistic' : (catRaw || ''));
+      const featured = isYes(pick(r,idx,'featured'));
       const status = pick(r,idx,'stat');
       const active = isActive(status, year);
+      if (!featured) return null;
       return { job, year, prod: pick(r,idx,'prod'), url: pick(r,idx,'url'),
-               cat, selected, active };
+               cat, featured, active };
     }).filter(Boolean);
 
     const upcomingItems = data.filter(x=>x.active);

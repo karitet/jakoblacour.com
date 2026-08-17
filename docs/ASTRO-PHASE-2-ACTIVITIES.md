@@ -3,27 +3,27 @@
 ## Scope
 
 Phase 2 ports only the public Activities record to Astro. Its public route
-remains `/activities.html`; WordPress, DNS, hosting, production and the Google
-Sheet are unchanged.
+remains `/activities.html`; WordPress, DNS, hosting and production are
+unchanged.
 
 ## Structure
 
 - `src/pages/activities.astro` emits the static Activities page frame.
 - `src/components/ActivitiesExperience.astro` supplies the semantic Record
   structure, controls and clear source state.
-- `src/scripts/activities.js` progressively reads the existing Activities CSV,
+- `src/scripts/activities.js` progressively reads the Featured Activities CSV,
   renders its rows safely and preserves filters and sorting.
 - `src/lib/public-data.mjs` is the shared adapter for both Home Now and
   Activities, so accepted source headers and activity recognition do not drift.
-- `activities.html` remains frozen source material. The build copies it to
+- `activities.html` remains the legacy fallback page. The build copies it to
   `dist/legacy/activities.html` while Astro emits the live candidate at
   `dist/activities.html`.
 
 ## Preserved behaviour
 
-The record keeps its `All`, `Selected`, `Artistical` and `Educational` filters,
+The record keeps its `All`, `Artistic` and `Educational` filters,
 its year/title sort controls, separate Upcoming and Past sections, external
-activity links and the existing published Google CSV.
+activity links and the published Featured Activities CSV.
 
 The initial document is a complete static orientation. If the Google request
 fails or is paused with `?data=fallback`, it leaves the page usable and exposes

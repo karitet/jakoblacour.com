@@ -1,8 +1,7 @@
 ---
 const filters = [
   { value: "all", label: "All" },
-  { value: "selected", label: "Selected" },
-  { value: "Artistical", label: "Artistical" },
+  { value: "Artistic", label: "Artistic" },
   { value: "Educational", label: "Educational" }
 ];
 
@@ -34,7 +33,7 @@ const sorts = [
             class="control-button"
             type="button"
             data-activity-filter={filter.value}
-            aria-pressed={filter.value === "selected" ? "true" : "false"}
+            aria-pressed={filter.value === "all" ? "true" : "false"}
           >{filter.label}</button>
         ))}
       </div>

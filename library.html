@@ -37,7 +37,7 @@
   <header class="lib-head">
     <div>
       <h2 class="lib-title">Library</h2>
-      <p class="lib-intro">A selected archive of press, talks and project material.</p>
+      <p class="lib-intro">A featured selection of press, talks and project material.</p>
     </div>
     <div class="lib-controls">
       <div class="lib-group" role="group" aria-label="Show">
@@ -73,7 +73,7 @@
 
 <script>
 (async function(){
-  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSoQTksLhTrPuVf1M8TJ4NGXJs-rCyNwjBwoSXPQWTN6l51SUuN3LXEz2z9xa2ucABhEYHTy9F6pru_/pub?gid=912394319&single=true&output=csv';
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY/pub?gid=313139422&single=true&output=csv';
 
   const container = document.querySelector('.lib-table');
   const headRow = document.querySelector('.lib-row--head');
@@ -197,7 +197,7 @@
       const obj = {};
       headers.forEach((h, i)=> obj[h] = r[i] ?? '');
       obj.status = String(obj.status || '').toLowerCase();
-      obj.selected = /^(y(es)?|ja|true|1)$/i.test(String(obj.selected || '').trim());
+      obj.featured = /^(y(es)?|ja|true|1)$/i.test(String(obj.featured || obj.selected || '').trim());
       obj.date = String(obj.date || '').trim();
       obj.dateSort = toISODate(obj.date);
       if (obj.url) obj.url = String(obj.url).trim();
@@ -205,7 +205,7 @@
       obj.type = String(obj.type || '').trim();
       obj.outlet = String(obj.outlet || '').trim();
       return obj;
-    }).filter(o => o.status === 'publish' && o.selected && o.title);
+    }).filter(o => o.status === 'publish' && o.featured && o.title);
 
     if (!items.length){
       msg.textContent = 'No published items found.';

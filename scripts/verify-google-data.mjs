@@ -32,12 +32,12 @@ const now = currentActivities(parseActivitiesCsv(activitiesCsv));
 const library = parseLibraryCsv(libraryCsv);
 
 if (reel.length === 0) throw new Error("Home video reel: no publishable rows found.");
-if (now.length === 0) throw new Error("Activities and Now: no current rows found.");
-if (library.length === 0) throw new Error("Library: no publishable rows found.");
+if (now.length === 0) throw new Error("Featured Activities and Now: no current rows found.");
+if (library.length === 0) throw new Error("Featured Library: no publishable rows found.");
 
 console.log(`Home video reel: ${reel.length} publishable row(s).`);
-console.log(`Activities and Now: ${now.length} current row(s) used by Home.`);
-console.log(`Library: ${library.length} publishable row(s).`);
+console.log(`Featured Activities and Now: ${now.length} current row(s) used by Home.`);
+console.log(`Featured Library: ${library.length} publishable row(s).`);
 
 if (siteContent.sourceState === "live") {
   console.log(`Site Content: ${Object.keys(siteContent.liveValues).length} resolved public key(s).`);

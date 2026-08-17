@@ -27,7 +27,8 @@ permanent portals rather than a generic website section.
 
 ## Home video reel
 
-Source: published Google CSV, `gid=0`
+Source: Featured Activities in the Record sheet,
+`1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY`, `gid=0`
 
 Configured in: `src/config/data-sources.mjs`
 
@@ -60,14 +61,14 @@ Used by: Astro Home and Astro `/activities.html`
 | `production` | `production company`, `company`, `producer`, `producent`, `produktion`, `produktionsselskab`, `produktion selskab` | Activity credit |
 | `url` | `url`, `link`, `href` | Optional public destination |
 | `category` | `category`, `kategori`, `artistical/educational`, `artistic/educational`, `type` | Filter and grouping |
-| `selected` | `selected`, `udvalgt`, `yes/no`, `selected?`, `is selected` | Activities selection filter |
+| `featured` | `featured` (with `selected` retained only as a legacy alias) | Public activity feed gate |
 | `status` | `status`, `state`, `aktiv`, `active/past` | Current/upcoming recognition |
 
 Home shows up to four current or upcoming rows. On mobile, the composition
 intentionally shows the first two. Failure behavior: the saved Hyperspectral and
 Morphic Realities orientation remains visible with a concise source note.
 
-Activities keeps the existing `All`, `Selected`, `Artistical` and `Educational`
+Activities keeps the `All`, `Artistic` and `Educational`
 filters, and its year/title sorting. It initially renders the page structure and
 then reads this same public CSV. If the source fails, it keeps the frame and
 reports that the live record is unavailable rather than presenting a blank page.
@@ -106,11 +107,12 @@ Google is unavailable.
 
 ## Library
 
-Source: published Google CSV, `gid=912394319`
+Source: Featured Library in the Record sheet,
+`1kUfkSizM-CbCaxC9vDIZXn3EPCOt7IFU4G-Uir_vayY`, `gid=313139422`
 
-Required public fields are `title`, `status` and `selected`; only rows where
-`status=publish` and `selected` is checked are shown. The current UI also
-consumes `type`, `date`, `url` and `outlet`. `Codex valg` is editorial guidance
+Required public fields are `title`, `status` and `featured`; only rows where
+`status=publish` and `featured` is checked are shown. The current UI also
+consumes `type`, `date`, `url` and `outlet`. `AI proposal` is editorial guidance
 in the sheet only and never changes the public Library.
 
 ## Site Content

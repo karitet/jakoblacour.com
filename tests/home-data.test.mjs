@@ -62,23 +62,26 @@ test("reel parser accepts aliases and only publishes safe media", () => {
 test("activities parser finds headers below introductory rows", () => {
   const csv = [
     "Public activities",
-    "Job title,Year,Production company,URL,Category,Selected,Status",
-    "Hyperspectral,2027,Jakob la Cour,https://example.com/h,Artistical,yes,upcoming",
+    "Job title,Year,Production company,URL,Category,Featured,Status",
+    "Hyperspectral,2027,Jakob la Cour,https://example.com/h,Artistic,yes,upcoming",
     "Past work,2020,Company,,Educational,no,past"
   ].join("\n");
 
-  const current = currentActivities(parseActivitiesCsv(csv));
+  const activities = parseActivitiesCsv(csv);
+  const current = currentActivities(activities);
+
+  assert.equal(activities.length, 1);
   assert.equal(current.length, 1);
   assert.equal(current[0].job, "Hyperspectral");
-  assert.equal(current[0].selected, true);
-  assert.equal(current[0].category, "Artistical");
+  assert.equal(current[0].featured, true);
+  assert.equal(current[0].category, "Artistic");
 });
 
-test("activity helpers preserve the legacy filters and sort order", () => {
+test("activity helpers preserve Artistic and Educational filters and sort order", () => {
   const activities = [
-    { job: "Zeta", year: "2024", category: "Educational", selected: false },
-    { job: "Alpha", year: "2027–", category: "Artistical", selected: true },
-    { job: "Beta", year: "2026", category: "Artistical", selected: false }
+    { job: "Zeta", year: "2024", category: "Educational", featured: true },
+    { job: "Alpha", year: "2027–", category: "Artistic", featured: true },
+    { job: "Beta", year: "2026", category: "Artistic", featured: true }
   ];
 
   assert.deepEqual(
@@ -89,8 +92,8 @@ test("activity helpers preserve the legacy filters and sort order", () => {
     sortActivities(activities, "title-asc").map((item) => item.job),
     ["Alpha", "Beta", "Zeta"]
   );
-  assert.equal(activityMatchesFilter(activities[1], "selected"), true);
-  assert.equal(activityMatchesFilter(activities[0], "Artistical"), false);
+  assert.equal(activityMatchesFilter(activities[1], "all"), true);
+  assert.equal(activityMatchesFilter(activities[0], "Artistic"), false);
   assert.equal(activityYearKey("2027–"), "2027");
 });
 
@@ -115,10 +118,10 @@ test("activity year sorts place unknown and invalid years after valid years", ()
 test("library parser preserves the published schema, link safety and publication gate", () => {
   const csv = [
     "Library record",
-    "Title,Type,Date,URL,Outlet,Language,Status,Project,Quote,External ID,Selected,Codex valg",
+    "Title,Type,Date,URL,Outlet,Language,Status,Project,Quote,External ID,Featured,AI proposal",
     "A quoted document,Press mention,2025.8.3,https://example.com/article,Example Press,EN,publish,Hybrid Sensation,Visible quote,ref-1,true,true",
     "A localised date,Press mention,04/09/2018,https://example.com/localised,Example Press,DK,publish,,,,true,false",
-    "Unselected document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,publish,,,,false,false",
+    "Unfeatured document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,publish,,,,false,false",
     "Unpublished document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,planned,,,,true,false"
   ].join("\n");
 

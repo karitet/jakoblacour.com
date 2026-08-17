@@ -7,7 +7,7 @@ import {
 
 const forcedFallback = new URLSearchParams(window.location.search).get("data") === "fallback";
 const state = {
-  filter: "selected",
+  filter: "all",
   sort: "year-desc",
   items: []
 };

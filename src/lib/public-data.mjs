@@ -30,7 +30,7 @@ const ACTIVITY_COLUMNS = Object.freeze({
     "artistic/educational",
     "type"
   ],
-  selected: ["selected", "udvalgt", "yes/no", "selected?", "is selected"],
+  featured: ["featured", "selected", "udvalgt", "yes/no", "selected?", "is selected"],
   status: ["status", "state", "aktiv", "active/past"]
 });
 
@@ -44,7 +44,7 @@ const LIBRARY_COLUMNS = Object.freeze({
   project: ["project", "work"],
   quote: ["quote", "excerpt", "description"],
   externalId: ["external_id", "external id", "id"],
-  selected: ["selected", "udvalgt", "yes/no", "selected?", "is selected"],
+  featured: ["featured", "selected", "udvalgt", "yes/no", "selected?", "is selected"],
   status: ["status", "state", "publish"]
 });
 
@@ -182,6 +182,8 @@ export function parseActivitiesCsv(text) {
       const status = pick(row, indexes, "status").toLowerCase();
       const active = /(active|current|ongoing|present|now|aktuel|upcoming|kommende)/.test(status)
         || /^\s*\d{4}\s*[–-]\s*$/.test(year);
+      const featured = /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "featured"));
+      if (!featured) return null;
 
       return {
         job,
@@ -189,7 +191,7 @@ export function parseActivitiesCsv(text) {
         production: pick(row, indexes, "production"),
         url: safePublicUrl(pick(row, indexes, "url")),
         category: activityCategory(pick(row, indexes, "category")),
-        selected: /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "selected")),
+        featured,
         status,
         active
       };
@@ -233,8 +235,8 @@ export function parseLibraryCsv(text) {
     .map((row) => {
       const title = pick(row, indexes, "title");
       const status = pick(row, indexes, "status").toLowerCase();
-      const selected = /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "selected"));
-      if (!title || status !== "publish" || !selected) return null;
+      const featured = /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "featured"));
+      if (!title || status !== "publish" || !featured) return null;
 
       const rawDate = pick(row, indexes, "date");
       return {
@@ -263,13 +265,12 @@ export function currentActivities(items, limit = 4) {
 export function activityCategory(value) {
   const category = String(value ?? "").trim();
   if (/educ/i.test(category)) return "Educational";
-  if (/art/i.test(category)) return "Artistical";
+  if (/art/i.test(category)) return "Artistic";
   return category;
 }
 
 export function activityMatchesFilter(item, filter) {
   if (!filter || filter === "all") return true;
-  if (filter === "selected") return item.selected;
   return item.category === filter;
 }
 
