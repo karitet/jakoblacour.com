@@ -44,6 +44,7 @@ const LIBRARY_COLUMNS = Object.freeze({
   project: ["project", "work"],
   quote: ["quote", "excerpt", "description"],
   externalId: ["external_id", "external id", "id"],
+  selected: ["selected", "udvalgt", "yes/no", "selected?", "is selected"],
   status: ["status", "state", "publish"]
 });
 
@@ -223,7 +224,8 @@ export function parseLibraryCsv(text) {
     .map((row) => {
       const title = pick(row, indexes, "title");
       const status = pick(row, indexes, "status").toLowerCase();
-      if (!title || status !== "publish") return null;
+      const selected = /^(y(es)?|ja|true|1)$/i.test(pick(row, indexes, "selected"));
+      if (!title || status !== "publish" || !selected) return null;
 
       const rawDate = pick(row, indexes, "date");
       return {

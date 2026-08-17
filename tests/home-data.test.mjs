@@ -115,9 +115,10 @@ test("activity year sorts place unknown and invalid years after valid years", ()
 test("library parser preserves the published schema, link safety and publication gate", () => {
   const csv = [
     "Library record",
-    "Title,Type,Date,URL,Outlet,Language,Status,Project,Quote,External ID",
-    "A quoted document,Press mention,2025.8.3,https://example.com/article,Example Press,EN,publish,Hybrid Sensation,Visible quote,ref-1",
-    "Unpublished document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,planned,,,"
+    "Title,Type,Date,URL,Outlet,Language,Status,Project,Quote,External ID,Selected,Codex valg",
+    "A quoted document,Press mention,2025.8.3,https://example.com/article,Example Press,EN,publish,Hybrid Sensation,Visible quote,ref-1,true,true",
+    "Unselected document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,publish,,,,false,false",
+    "Unpublished document,Newsletter,2024-04-02,https://example.com/draft,Studio,EN,planned,,,,true,false"
   ].join("\n");
 
   assert.deepEqual(parseLibraryCsv(csv), [{
